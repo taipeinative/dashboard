@@ -58,6 +58,18 @@
   function sanitizeAnime(raw) {
     var year = Number(raw.year);
     var stars = Number(raw.stars);
+    var normalizedSeries = Array.isArray(raw.series) ? raw.series.map(function (s, index) {
+      return {
+        id: String(s.id || (Date.now() + "-" + index)),
+        name: String(s.name || ""),
+        date: String(s.date || ""),
+        link: String(s.link || ""),
+        stars: Number.isFinite(Number(s.stars)) ? Math.max(0, Math.min(5, Number(s.stars))) : 0
+      };
+    }).filter(function (s) {
+      return s.name;
+    }) : [];
+
     return {
       id: String(raw.id || Date.now()),
       title: String(raw.title || "Untitled"),
@@ -65,9 +77,13 @@
       year: Number.isFinite(year) ? year : new Date().getFullYear(),
       tags: Array.isArray(raw.tags) ? raw.tags.map(trimText).filter(Boolean) : [],
       stars: Number.isFinite(stars) ? Math.max(0, Math.min(5, stars)) : 0,
+      unwatched: Boolean(raw.unwatched || false),
+      onair: Boolean(raw.onair || false),
       link: String(raw.link || ""),
       thumbnail: String(raw.thumbnail || "https://picsum.photos/seed/placeholder/480/270"),
-      note: String(raw.note || "")
+      note: String(raw.note || ""),
+      series: normalizedSeries,
+      lastEdited: String(raw.lastEdited || "")
     };
   }
 
@@ -149,6 +165,26 @@
     }));
   }
 
+  function formatDate(dateString) {
+    try {
+      var date = new Date(dateString);
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, "0");
+      var day = String(date.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  function getCurrentDateString() {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = String(now.getMonth() + 1).padStart(2, "0");
+    var day = String(now.getDate()).padStart(2, "0");
+    return year + "-" + month + "-" + day;
+  }
+
   function setTheme(theme) {
     var next = theme === "dark" ? "dark" : "light";
     document.body.setAttribute("data-theme", next);
@@ -227,7 +263,12 @@
       return state.animes.slice();
     }
     return state.animes.filter(function (item) {
-      return item.title.toLowerCase().indexOf(q) >= 0 || item.originalTitle.toLowerCase().indexOf(q) >= 0;
+      var seriesMatch = Array.isArray(item.series) && item.series.some(function (seriesItem) {
+        return String(seriesItem.name || "").toLowerCase().indexOf(q) >= 0;
+      });
+      return item.title.toLowerCase().indexOf(q) >= 0 ||
+        item.originalTitle.toLowerCase().indexOf(q) >= 0 ||
+        seriesMatch;
     });
   }
 
@@ -329,24 +370,51 @@
 
     if (state.viewMode === "compact") {
       return '<ul class="anime-list">' + data.map(function (item) {
-        return '<li class="anime-row" data-id="' + escapeHtml(item.id) + '" tabindex="0">' +
-          '<div><strong>' + escapeHtml(item.title) + '</strong><br /><small>' +
+        return '<li class="anime-row' + (item.unwatched ? ' is-unwatched' : '') + (item.onair ? ' is-onair' : '') + '" data-id="' + escapeHtml(item.id) + '" tabindex="0">' +
+          '<div><strong>' + escapeHtml(item.title) + '</strong>' + (item.onair ? ' <span class="status-chip onair-chip">On Air</span>' : '') + '<br /><small>' +
           escapeHtml(item.originalTitle || "No original title") + '</small></div>' +
           '<small>' + escapeHtml(String(item.year)) + '</small>' +
-          '<span class="stars">' + escapeHtml(starsText(item.stars)) + '</span>' +
+          '<span class="stars">' + (item.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(item.stars))) + '</span>' +
           '</li>';
       }).join("") + '</ul>';
     }
 
     return '<div class="grid">' + data.map(function (item) {
-      return '<article class="anime-card" data-id="' + escapeHtml(item.id) + '" tabindex="0">' +
+      return '<article class="anime-card' + (item.unwatched ? ' is-unwatched' : '') + (item.onair ? ' is-onair' : '') + '" data-id="' + escapeHtml(item.id) + '" tabindex="0">' +
         '<img src="' + escapeHtml(item.thumbnail) + '" alt="' + escapeHtml(item.title + " thumbnail") + '" />' +
         '<div class="anime-card-body">' +
         '<strong>' + escapeHtml(item.title) + '</strong>' +
-        '<small>' + escapeHtml(String(item.year)) + '</small>' +
-        '<span class="stars">' + escapeHtml(starsText(item.stars)) + '</span>' +
+        '<small>' + escapeHtml(String(item.year)) + (item.onair ? ' <span class="status-chip onair-chip">On Air</span>' : '') + '</small>' +
+        '<span class="stars">' + (item.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(item.stars))) + '</span>' +
         '</div></article>';
     }).join("") + '</div>';
+  }
+
+  function seriesRowHtml(seriesItem, index) {
+    var stars = Number(seriesItem.stars) || 0;
+    var ratingHtml = stars > 0 ? escapeHtml(starsText(stars)) : "-";
+    var seasonName = seriesItem.link
+      ? '<a href="' + escapeHtml(seriesItem.link) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(seriesItem.name) + '</a>'
+      : escapeHtml(seriesItem.name || "-");
+    return '<tr>' +
+      '<td class="series-col-name">' + seasonName + '</td>' +
+      '<td class="series-col-date">' + escapeHtml(seriesItem.date || "-") + '</td>' +
+      '<td class="series-col-stars">' + ratingHtml + '</td>' +
+      '</tr>';
+  }
+
+  function seriesTableHtml(seriesList) {
+    if (!seriesList || !seriesList.length) {
+      return '<div class="empty">No series data.</div>';
+    }
+
+    return '<table class="series-table">' +
+      '<tbody>' +
+      seriesList.map(function (seriesItem, index) {
+        return seriesRowHtml(seriesItem, index);
+      }).join("") +
+      '</tbody>' +
+      '</table>';
   }
 
   function updateAllResults() {
@@ -499,8 +567,12 @@
         <article class="card detail-content">
           <div class="detail-header">
             <div>
-              <h2>${escapeHtml(anime.title)}</h2>
+              <h2>${escapeHtml(anime.title)}${anime.onair ? ' <span class="status-chip onair-chip pulse-chip">On Air</span>' : ''}</h2>
               <p class="subtitle">${escapeHtml(anime.originalTitle || "No original title")}</p>
+              <div class="detail-actions mobile-actions">
+                <button type="button" class="secondary-button" id="edit-button-mobile">Edit</button>
+                <button type="button" class="secondary-button danger" id="delete-button-mobile">Delete</button>
+              </div>
             </div>
             <div class="detail-actions">
               <button type="button" class="secondary-button" id="edit-button">Edit</button>
@@ -510,13 +582,17 @@
           <img class="detail-thumb" src="${escapeHtml(anime.thumbnail)}" alt="${escapeHtml(anime.title + " thumbnail")}" />
           <div class="meta-grid">
             <div class="meta-item"><label>Year</label><div>${escapeHtml(String(anime.year))}</div></div>
-            <div class="meta-item"><label>Stars</label><div class="stars">${escapeHtml(starsText(anime.stars))}</div></div>
+            <div class="meta-item"><label>Stars</label><div class="stars">${anime.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(anime.stars))}</div></div>
             <div class="meta-item"><label>Tags</label><div class="tags">${anime.tags.length ? anime.tags.map(function (tag) { return '<span class="tag">' + escapeHtml(tag) + '</span>'; }).join("") : '<span class="tag">No tags</span>'}</div></div>
             <div class="meta-item"><label>Link</label><div>${anime.link ? (anime.link.indexOf(',') >= 0 ? anime.link.split(',').map(function(link) { var trimmed = trimText(link); return trimmed ? '<a href="' + escapeHtml(trimmed) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(extractDomain(trimmed)) + '</a>' : ''; }).filter(Boolean).join(', ') : '<a href="' + escapeHtml(anime.link) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(extractDomain(anime.link)) + '</a>') : 'No link'}</div></div>
           </div>
+          <div class="series-section expanded"><h3 class="expanded">Series</h3><div class="series-list">${seriesTableHtml(anime.series)}</div></div>
           <div>
             <h3>Note</h3>
             <p class="note">${escapeHtml(anime.note || "No notes yet.")}</p>
+          </div>
+          <div class="detail-footer">
+            ${anime.lastEdited ? 'Last edited: ' + escapeHtml(formatDate(anime.lastEdited)) : 'Never edited'}
           </div>
         </article>
       </section>
@@ -526,13 +602,13 @@
       navigate("#all");
     });
 
-    document.getElementById("edit-button").addEventListener("click", function () {
+    function openEdit() {
       state.preEditReturnId = anime.id;
       state.editMode = "edit";
       navigate("#edit/" + anime.id);
-    });
+    }
 
-    document.getElementById("delete-button").addEventListener("click", function () {
+    function doDelete() {
       if (confirm("Are you sure you want to delete '" + anime.title + "'?")) {
         state.animes = state.animes.filter(function (entry) {
           return entry.id !== anime.id;
@@ -541,7 +617,28 @@
         saveState();
         navigate("#all");
       }
-    });
+    }
+
+    document.getElementById("edit-button").addEventListener("click", openEdit);
+    var editMobile = document.getElementById("edit-button-mobile");
+    if (editMobile) {
+      editMobile.addEventListener("click", openEdit);
+    }
+
+    document.getElementById("delete-button").addEventListener("click", doDelete);
+    var deleteMobile = document.getElementById("delete-button-mobile");
+    if (deleteMobile) {
+      deleteMobile.addEventListener("click", doDelete);
+    }
+
+    var seriesHeading = appRoot.querySelector(".series-section h3");
+    if (seriesHeading) {
+      seriesHeading.addEventListener("click", function () {
+        var seriesSection = appRoot.querySelector(".series-section");
+        seriesSection.classList.toggle("expanded");
+        seriesHeading.classList.toggle("expanded");
+      });
+    }
   }
 
   function renderEditPage() {
@@ -553,9 +650,13 @@
           year: new Date().getFullYear(),
           tags: [],
           stars: 3,
+          unwatched: false,
+          onair: false,
           link: "",
           thumbnail: "https://picsum.photos/seed/newanime/480/270",
-          note: ""
+          note: "",
+          series: [],
+          lastEdited: ""
         }
       : findById(state.selectedId);
 
@@ -573,8 +674,24 @@
             <div class="field"><label for="originalTitle">Original Title</label><input class="input" id="originalTitle" name="originalTitle" value="${escapeHtml(anime.originalTitle)}" /></div>
             <div class="field"><label for="year">Year</label><input class="input" id="year" name="year" type="number" min="1910" max="2100" value="${escapeHtml(String(anime.year))}" /></div>
             <div class="field"><label for="tags">Tags (comma separated)</label><input class="input" id="tags" name="tags" value="${escapeHtml(anime.tags.join(", "))}" /></div>
-            <div class="field"><label for="stars">Stars (0 to 5)</label><input class="input" id="stars" name="stars" type="number" step="0.1" min="0" max="5" value="${escapeHtml(String(anime.stars))}" /></div>
+            <div class="field"><label for="stars">Stars (0 to 5)</label><input class="input" id="stars" name="stars" type="number" step="0.1" min="0" max="5" value="${escapeHtml(String(anime.stars))}" ${anime.unwatched ? "disabled" : ""} /></div>
+            <div class="field checkbox-field"><input class="input" id="unwatched" name="unwatched" type="checkbox" ${anime.unwatched ? "checked" : ""} /><label for="unwatched">Mark as unwatched</label></div>
+            <div class="field checkbox-field"><input class="input" id="onair" name="onair" type="checkbox" ${anime.onair ? "checked" : ""} /><label for="onair">Currently on air</label></div>
             <div class="field"><label for="link">Website Link</label><input class="input" id="link" name="link" type="url" value="${escapeHtml(anime.link)}" /></div>
+            <div class="field"><label>Series</label>
+              <div id="series-editor" class="series-editor">${anime.series.map(function (s) {
+                return '<div class="series-edit-item" draggable="false" data-series-id="' + escapeHtml(s.id) + '">' +
+                  '<div class="series-edit-head"><span class="drag-handle" title="Drag to reorder">::</span><button type="button" class="ghost-button series-remove">Remove</button></div>' +
+                  '<div class="series-edit-grid">' +
+                  '<input class="input series-name" placeholder="Season name" value="' + escapeHtml(s.name) + '" />' +
+                  '<input class="input series-date" type="date" value="' + escapeHtml(s.date) + '" />' +
+                  '<input class="input series-link" type="url" placeholder="https://..." value="' + escapeHtml(s.link) + '" />' +
+                  '<input class="input series-stars" type="number" min="0" max="5" step="0.1" placeholder="Rating" value="' + escapeHtml(String(s.stars || "")) + '" />' +
+                  '</div>' +
+                  '</div>';
+              }).join("")}</div>
+              <button type="button" class="secondary-button" id="series-add">Add New</button>
+            </div>
             <div class="field"><label for="thumbnail">Thumbnail URL</label><input class="input" id="thumbnail" name="thumbnail" type="url" value="${escapeHtml(anime.thumbnail)}" /></div>
             <div class="field"><label for="note">Note</label><textarea id="note" name="note">${escapeHtml(anime.note)}</textarea></div>
             <div class="form-actions">
@@ -599,6 +716,94 @@
       }
     });
 
+    function seriesEditItemHtml(id) {
+      return '<div class="series-edit-item" draggable="false" data-series-id="' + escapeHtml(id) + '">' +
+        '<div class="series-edit-head"><span class="drag-handle" title="Drag to reorder">::</span><button type="button" class="ghost-button series-remove">Remove</button></div>' +
+        '<div class="series-edit-grid">' +
+        '<input class="input series-name" placeholder="Season name" />' +
+        '<input class="input series-date" type="date" />' +
+        '<input class="input series-link" type="url" placeholder="https://..." />' +
+        '<input class="input series-stars" type="number" min="0" max="5" step="0.1" placeholder="Rating" />' +
+        '</div>' +
+        '</div>';
+    }
+
+    var starsInput = document.getElementById("stars");
+    var unwatchedInput = document.getElementById("unwatched");
+    var seriesEditor = document.getElementById("series-editor");
+    var seriesAdd = document.getElementById("series-add");
+    var draggingSeries = null;
+
+    function syncStarsDisabled() {
+      starsInput.disabled = unwatchedInput.checked;
+    }
+
+    function installSeriesHandlers() {
+      Array.prototype.forEach.call(seriesEditor.querySelectorAll(".series-remove"), function (btn) {
+        btn.onclick = function () {
+          var item = btn.closest(".series-edit-item");
+          if (item) {
+            item.remove();
+          }
+        };
+      });
+
+      Array.prototype.forEach.call(seriesEditor.querySelectorAll(".series-edit-item"), function (item) {
+        var handle = item.querySelector(".drag-handle");
+
+        if (handle) {
+          handle.onmousedown = function () {
+            item.setAttribute("draggable", "true");
+          };
+          handle.onmouseup = function () {
+            item.setAttribute("draggable", "false");
+          };
+          handle.onmouseleave = function () {
+            item.setAttribute("draggable", "false");
+          };
+        }
+
+        item.ondragstart = function () {
+          if (item.getAttribute("draggable") !== "true") {
+            return false;
+          }
+          draggingSeries = item;
+          item.classList.add("dragging");
+        };
+        item.ondragend = function () {
+          item.classList.remove("dragging");
+          draggingSeries = null;
+          item.setAttribute("draggable", "false");
+        };
+        item.ondragover = function (event) {
+          event.preventDefault();
+        };
+        item.ondrop = function (event) {
+          event.preventDefault();
+          if (!draggingSeries || draggingSeries === item) {
+            return;
+          }
+          var targetRect = item.getBoundingClientRect();
+          var before = event.clientY < targetRect.top + targetRect.height / 2;
+          if (before) {
+            seriesEditor.insertBefore(draggingSeries, item);
+          } else {
+            seriesEditor.insertBefore(draggingSeries, item.nextSibling);
+          }
+        };
+      });
+    }
+
+    unwatchedInput.addEventListener("change", syncStarsDisabled);
+    syncStarsDisabled();
+    installSeriesHandlers();
+
+    seriesAdd.addEventListener("click", function () {
+      var id = "s-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+      seriesEditor.insertAdjacentHTML("beforeend", seriesEditItemHtml(id));
+      installSeriesHandlers();
+    });
+
     document.getElementById("anime-form").addEventListener("submit", function (event) {
       event.preventDefault();
       var form = event.target;
@@ -616,9 +821,23 @@
         year: Number(form.year.value),
         tags: trimText(form.tags.value).split(","),
         stars: Number(form.stars.value),
+        unwatched: form.unwatched.checked,
+        onair: form.onair.checked,
         link: trimText(form.link.value),
         thumbnail: trimText(form.thumbnail.value),
-        note: trimText(form.note.value)
+        note: trimText(form.note.value),
+        series: Array.prototype.map.call(seriesEditor.querySelectorAll(".series-edit-item"), function (item) {
+          return {
+            id: item.getAttribute("data-series-id") || ("s-" + Date.now()),
+            name: trimText(item.querySelector(".series-name").value),
+            date: trimText(item.querySelector(".series-date").value),
+            link: trimText(item.querySelector(".series-link").value),
+            stars: Number(item.querySelector(".series-stars").value)
+          };
+        }).filter(function (item) {
+          return item.name;
+        }),
+        lastEdited: getCurrentDateString()
       });
 
       if (state.editMode === "new") {
