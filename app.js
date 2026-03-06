@@ -14,41 +14,7 @@
     { id: "stars-desc", label: "Stars (high-low)" }
   ];
 
-  var defaultAnime = [
-    {
-      id: "a1",
-      title: "Frieren: Beyond Journey's End",
-      originalTitle: "Sousou no Frieren",
-      year: 2023,
-      tags: ["Fantasy", "Drama", "Adventure"],
-      stars: 4.9,
-      link: "https://myanimelist.net/anime/52991/Sousou_no_Frieren",
-      thumbnail: "https://picsum.photos/seed/frieren/480/270",
-      note: "Quiet, emotional storytelling with strong world building and character growth."
-    },
-    {
-      id: "a2",
-      title: "Steins;Gate",
-      originalTitle: "Shutainzu Geeto",
-      year: 2011,
-      tags: ["Sci-Fi", "Thriller", "Drama"],
-      stars: 4.8,
-      link: "https://myanimelist.net/anime/9253/Steins_Gate",
-      thumbnail: "https://picsum.photos/seed/steinsgate/480/270",
-      note: "Dense first half that pays off with excellent tension and one of my favorite endings."
-    },
-    {
-      id: "a3",
-      title: "Haikyuu!!",
-      originalTitle: "Haikyuu!!",
-      year: 2014,
-      tags: ["Sports", "Comedy", "School"],
-      stars: 4.6,
-      link: "https://myanimelist.net/anime/20583/Haikyuu",
-      thumbnail: "https://picsum.photos/seed/haikyuu/480/270",
-      note: "Fast pacing, great team chemistry, and every match feels meaningful."
-    }
-  ];
+  var DEFAULT_ANIME_URL = "./default-anime.json";
 
   var state = {
     animes: [],
@@ -126,28 +92,51 @@
   }
 
   function loadState() {
-    try {
-      var saved = JSON.parse(localStorage.getItem(APP_KEY) || "null");
-      if (saved && Array.isArray(saved.animes)) {
-        state.animes = saved.animes.map(sanitizeAnime);
-        state.searchQuery = String(saved.searchQuery || "");
-        state.sortMode = isValidSort(saved.sortMode) ? saved.sortMode : "none";
-        state.viewMode = saved.viewMode === "compact" ? "compact" : "normal";
-        state.selectedId = saved.selectedId || null;
-      } else {
-        state.animes = defaultAnime.slice();
+    var saved = localStorage.getItem(APP_KEY);
+    if (saved) {
+      try {
+        var parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.animes)) {
+          state.animes = parsed.animes.map(sanitizeAnime);
+          state.searchQuery = String(parsed.searchQuery || "");
+          state.sortMode = isValidSort(parsed.sortMode) ? parsed.sortMode : "none";
+          state.viewMode = parsed.viewMode === "compact" ? "compact" : "normal";
+          state.selectedId = parsed.selectedId || null;
+          
+          if (!state.animes.length) {
+            return loadDefaultAnime();
+          }
+          
+          if (!findById(state.selectedId)) {
+            state.selectedId = state.animes[0] ? state.animes[0].id : null;
+          }
+          return Promise.resolve();
+        }
+      } catch (err) {
+        console.error("Error parsing saved state:", err);
       }
-    } catch (err) {
-      state.animes = defaultAnime.slice();
     }
+    
+    return loadDefaultAnime();
+  }
 
-    if (!state.animes.length) {
-      state.animes = defaultAnime.slice();
-    }
-
-    if (!findById(state.selectedId)) {
-      state.selectedId = state.animes[0] ? state.animes[0].id : null;
-    }
+  function loadDefaultAnime() {
+    return fetch(DEFAULT_ANIME_URL)
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Failed to load default anime data");
+        }
+        return response.json();
+      })
+      .then(function (data) {
+        state.animes = data.map(sanitizeAnime);
+        state.selectedId = state.animes[0] ? state.animes[0].id : null;
+      })
+      .catch(function (err) {
+        console.error("Error loading default anime:", err);
+        state.animes = [];
+        state.selectedId = null;
+      });
   }
 
   function saveState() {
@@ -181,16 +170,55 @@
 
   function starsText(value) {
     var rounded = Math.round(Number(value) || 0);
-    var full = "";
-    var empty = "";
+    var stars = "";
     var i;
     for (i = 0; i < rounded; i += 1) {
-      full += "*";
+      stars += "★";
     }
-    for (i = rounded; i < 5; i += 1) {
-      empty += ".";
+    return stars + " (" + Number(value).toFixed(1) + ")";
+  }
+
+  function countNonWhitespaceNonPunctuation(text) {
+    var count = 0;
+    var i;
+    var char;
+    for (i = 0; i < text.length; i += 1) {
+      char = text[i];
+      if (!/[\s\p{P}]/u.test(char)) {
+        count += 1;
+      }
     }
-    return full + empty + " (" + Number(value).toFixed(1) + ")";
+    return count;
+  }
+
+  function countAsciiCharacters(text) {
+    var count = 0;
+    var i;
+    var code;
+    for (i = 0; i < text.length; i += 1) {
+      code = text.charCodeAt(i);
+      if (code >= 32 && code <= 126) {
+        if (!/[\s\p{P}]/u.test(text[i])) {
+          count += 1;
+        }
+      }
+    }
+    return count;
+  }
+
+  function shouldShowAutocomplete(text) {
+    var asciiCount = countAsciiCharacters(text);
+    var otherCount = countNonWhitespaceNonPunctuation(text) - asciiCount;
+    return asciiCount > 3 || otherCount > 1;
+  }
+
+  function extractDomain(url) {
+    try {
+      var urlObj = new URL(url);
+      return urlObj.hostname;
+    } catch (e) {
+      return url;
+    }
   }
 
   function filteredAnimes() {
@@ -328,19 +356,35 @@
       return;
     }
 
-    optionsElement.innerHTML = state.animes.map(function (item) {
-      return '<option value="' + escapeHtml(item.title) + '"></option>';
-    }).join("");
+    var searchQuery = state.searchQuery.trim();
+    var showAutocomplete = shouldShowAutocomplete(searchQuery);
+
+    if (showAutocomplete && searchQuery) {
+      optionsElement.innerHTML = state.animes.map(function (item) {
+        return '<option value="' + escapeHtml(item.title) + '"></option>';
+      }).join("");
+    } else {
+      optionsElement.innerHTML = "";
+    }
 
     resultsElement.innerHTML = listHtmlFor(sortedAnimes(filteredAnimes()));
   }
 
   function syncSortUi() {
     var clearButton = document.getElementById("sort-clear");
+    var sortButton = document.getElementById("sort-button");
     var options = appRoot.querySelectorAll(".sort-option");
 
     if (clearButton) {
       clearButton.hidden = state.sortMode === "none";
+    }
+
+    if (sortButton) {
+      if (state.sortMode === "none") {
+        sortButton.classList.remove("active");
+      } else {
+        sortButton.classList.add("active");
+      }
     }
 
     Array.prototype.forEach.call(options, function (option) {
@@ -360,7 +404,7 @@
             <button class="icon-button sort-clear" id="sort-clear" type="button" aria-label="Clear sort" title="Clear sort" ${state.sortMode === "none" ? "hidden" : ""}>${iconX()}</button>
             <div class="sort-popover" id="sort-popover" hidden>${sortOptionsHtml()}</div>
           </div>
-          <div class="view-toggle" role="group" aria-label="View mode">
+          <div class="view-toggle" role="group" aria-label="View mode" data-active="${escapeHtml(state.viewMode)}">
             <button type="button" data-view="compact" class="toggle-option ${state.viewMode === "compact" ? "active" : ""}">Compact</button>
             <button type="button" data-view="normal" class="toggle-option ${state.viewMode === "normal" ? "active" : ""}">Normal</button>
           </div>
@@ -370,7 +414,7 @@
     `;
 
     updateAllResults();
-
+    syncSortUi();
     var searchInput = document.getElementById("search-input");
     var sortButton = document.getElementById("sort-button");
     var sortClear = document.getElementById("sort-clear");
@@ -458,14 +502,17 @@
               <h2>${escapeHtml(anime.title)}</h2>
               <p class="subtitle">${escapeHtml(anime.originalTitle || "No original title")}</p>
             </div>
-            <button type="button" class="secondary-button" id="edit-button">Edit</button>
+            <div class="detail-actions">
+              <button type="button" class="secondary-button" id="edit-button">Edit</button>
+              <button type="button" class="secondary-button danger" id="delete-button">Delete</button>
+            </div>
           </div>
           <img class="detail-thumb" src="${escapeHtml(anime.thumbnail)}" alt="${escapeHtml(anime.title + " thumbnail")}" />
           <div class="meta-grid">
             <div class="meta-item"><label>Year</label><div>${escapeHtml(String(anime.year))}</div></div>
             <div class="meta-item"><label>Stars</label><div class="stars">${escapeHtml(starsText(anime.stars))}</div></div>
             <div class="meta-item"><label>Tags</label><div class="tags">${anime.tags.length ? anime.tags.map(function (tag) { return '<span class="tag">' + escapeHtml(tag) + '</span>'; }).join("") : '<span class="tag">No tags</span>'}</div></div>
-            <div class="meta-item"><label>Link</label><div>${anime.link ? '<a href="' + escapeHtml(anime.link) + '" target="_blank" rel="noopener noreferrer">Open site</a>' : 'No link'}</div></div>
+            <div class="meta-item"><label>Link</label><div>${anime.link ? (anime.link.indexOf(',') >= 0 ? anime.link.split(',').map(function(link) { var trimmed = trimText(link); return trimmed ? '<a href="' + escapeHtml(trimmed) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(extractDomain(trimmed)) + '</a>' : ''; }).filter(Boolean).join(', ') : '<a href="' + escapeHtml(anime.link) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(extractDomain(anime.link)) + '</a>') : 'No link'}</div></div>
           </div>
           <div>
             <h3>Note</h3>
@@ -483,6 +530,17 @@
       state.preEditReturnId = anime.id;
       state.editMode = "edit";
       navigate("#edit/" + anime.id);
+    });
+
+    document.getElementById("delete-button").addEventListener("click", function () {
+      if (confirm("Are you sure you want to delete '" + anime.title + "'?")) {
+        state.animes = state.animes.filter(function (entry) {
+          return entry.id !== anime.id;
+        });
+        state.selectedId = state.animes[0] ? state.animes[0].id : null;
+        saveState();
+        navigate("#all");
+      }
     });
   }
 
@@ -598,7 +656,7 @@
 
   addTopButton.innerHTML = iconPlus();
   addTopButton.addEventListener("click", function () {
-    state.preEditReturnId = state.selectedId;
+    state.preEditReturnId = state.page === "detail" ? state.selectedId : null;
     state.editMode = "new";
     navigate("#edit/new");
   });
@@ -609,12 +667,44 @@
     render();
   });
 
-  loadState();
-  initTheme();
-  parseHash();
-  if (!window.location.hash) {
-    navigate("#all");
-  } else {
-    render();
-  }
+  loadState().then(function () {
+    initTheme();
+    parseHash();
+    if (!window.location.hash) {
+      navigate("#all");
+    } else {
+      render();
+    }
+  });
+
+  window.clearAnimeDashboardStorage = function () {
+    if (confirm("Clear all anime data from local storage? This cannot be undone.")) {
+      localStorage.removeItem(APP_KEY);
+      loadDefaultAnime().then(function () {
+        state.searchQuery = "";
+        state.sortMode = "none";
+        state.viewMode = "normal";
+        saveState();
+        navigate("#all");
+        console.log("Local storage cleared and reset to default anime list.");
+      });
+    }
+  };
+
+  window.exportAnimeDashboard = function () {
+    var dataStr = JSON.stringify(state.animes, null, 2);
+    var dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    var exportFileDefaultName = "anime-dashboard-" + new Date().toISOString().split("T")[0] + ".json";
+
+    var linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+    
+    console.log("Exported " + state.animes.length + " anime entries to " + exportFileDefaultName);
+  };
+
+  console.log("Available commands:");
+  console.log("  clearAnimeDashboardStorage() - Clear all data and reset to defaults");
+  console.log("  exportAnimeDashboard() - Export current anime list as JSON file");
 })();

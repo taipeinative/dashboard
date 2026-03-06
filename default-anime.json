@@ -1,0 +1,35 @@
+[
+  {
+    "id": "a1",
+    "title": "Frieren: Beyond Journey's End",
+    "originalTitle": "Sousou no Frieren",
+    "year": 2023,
+    "tags": ["Fantasy", "Drama", "Adventure"],
+    "stars": 4.9,
+    "link": "https://myanimelist.net/anime/52991/Sousou_no_Frieren",
+    "thumbnail": "https://picsum.photos/seed/frieren/480/270",
+    "note": "Quiet, emotional storytelling with strong world building and character growth."
+  },
+  {
+    "id": "a2",
+    "title": "Steins;Gate",
+    "originalTitle": "Shutainzu Geeto",
+    "year": 2011,
+    "tags": ["Sci-Fi", "Thriller", "Drama"],
+    "stars": 4.8,
+    "link": "https://myanimelist.net/anime/9253/Steins_Gate",
+    "thumbnail": "https://picsum.photos/seed/steinsgate/480/270",
+    "note": "Dense first half that pays off with excellent tension and one of my favorite endings."
+  },
+  {
+    "id": "a3",
+    "title": "Haikyuu!!",
+    "originalTitle": "Haikyuu!!",
+    "year": 2014,
+    "tags": ["Sports", "Comedy", "School"],
+    "stars": 4.6,
+    "link": "https://myanimelist.net/anime/20583/Haikyuu",
+    "thumbnail": "https://picsum.photos/seed/haikyuu/480/270",
+    "note": "Fast pacing, great team chemistry, and every match feels meaningful."
+  }
+]

@@ -136,7 +136,6 @@ h1 {
 .page {
   display: grid;
   gap: 16px;
-  animation: reveal 220ms ease;
 }
 
 .card {
@@ -220,14 +219,35 @@ textarea:focus {
 }
 
 .view-toggle {
+  position: relative;
   display: inline-flex;
   background: var(--surface-muted);
   border-radius: 999px;
   border: 1px solid var(--border);
   padding: 4px;
+  overflow: hidden;
+}
+
+.view-toggle::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  border-radius: 999px;
+  background: var(--accent);
+  transition: transform 180ms ease;
+}
+
+.view-toggle[data-active="normal"]::before {
+  transform: translateX(100%);
 }
 
 .toggle-option {
+  position: relative;
+  z-index: 1;
+  min-width: 84px;
   border: 0;
   border-radius: 999px;
   font-weight: 700;
@@ -235,15 +255,16 @@ textarea:focus {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
+  transition: color 180ms ease;
 }
 
 .toggle-option.active {
-  background: var(--accent);
   color: #ffffff;
 }
 
 .list-wrap {
   padding: 14px;
+  animation: reveal 220ms ease;
 }
 
 .anime-list {
@@ -256,7 +277,7 @@ textarea:focus {
 
 .anime-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) 4ch 12ch;
   gap: 12px;
   align-items: center;
   border: 1px solid var(--border);
@@ -264,6 +285,11 @@ textarea:focus {
   background: var(--surface-muted);
   padding: 0.8rem 0.9rem;
   cursor: pointer;
+}
+
+.anime-row > :nth-child(2),
+.anime-row > :nth-child(3) {
+  justify-self: end;
 }
 
 .anime-row small {
@@ -333,6 +359,11 @@ textarea:focus {
   align-items: start;
 }
 
+.detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .detail-thumb {
   width: 100%;
   max-height: 300px;
@@ -369,6 +400,7 @@ textarea:focus {
   padding: 18px;
   display: grid;
   gap: 14px;
+  animation: reveal 220ms ease;
 }
 
 .note {
@@ -424,6 +456,18 @@ textarea {
 
 .secondary-button {
   background: transparent;
+}
+
+.secondary-button.danger {
+  color: var(--danger);
+}
+
+.secondary-button.danger:hover {
+  background: rgba(186, 47, 59, 0.1);
+}
+
+.icon-button.active {
+  color: var(--accent-strong);
 }
 
 .empty {
