@@ -2,7 +2,6 @@
   "use strict";
 
   var APP_KEY = "animeDashboard.v1";
-  var THEME_KEY = "animeDashboard.theme";
 
   var SORT_MODES = [
     { id: "none", label: "No sorting" },
@@ -27,6 +26,7 @@
     preEditReturnId: null
   };
 
+  var header = document.querySelectorAll(".app-header > div > h1");
   var appRoot = document.getElementById("app");
   var themeButton = document.getElementById("theme-toggle");
   var addTopButton = document.getElementById("add-anime-top");
@@ -188,18 +188,12 @@
   function setTheme(theme) {
     var next = theme === "dark" ? "dark" : "light";
     document.body.setAttribute("data-theme", next);
-    localStorage.setItem(THEME_KEY, next);
     themeButton.innerHTML = next === "dark" ? iconSun() : iconMoon();
     themeButton.setAttribute("aria-label", next === "dark" ? "Switch to light mode" : "Switch to dark mode");
     themeButton.setAttribute("title", next === "dark" ? "Switch to light mode" : "Switch to dark mode");
   }
 
   function initTheme() {
-    var saved = localStorage.getItem(THEME_KEY);
-    if (saved === "dark" || saved === "light") {
-      setTheme(saved);
-      return;
-    }
     var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     setTheme(prefersDark ? "dark" : "light");
   }
@@ -867,6 +861,12 @@
     }
     renderEditPage();
   }
+
+  header.forEach(node => node.addEventListener("click", function () {
+    if (state.page === "all") {
+      window.clearAnimeDashboardStorage();
+    }
+  }));
 
   themeButton.addEventListener("click", function () {
     var current = document.body.getAttribute("data-theme") || "light";
