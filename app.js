@@ -15,10 +15,21 @@
 
   var DEFAULT_ANIME_URL = "./default-anime.json";
 
+  var BAHAMUT_META_HOST = "acg.gamer.com.tw";
+  var BAHAMUT_PHOTO_HOST = "p2.bahamut.com.tw";
+
   var state = {
     animes: [],
     searchQuery: "",
     sortMode: "none",
+    filters: {
+      onair: false,
+      unwatched: false,
+      year: false,
+      yearValue: "",
+      tag: false,
+      selectedTags: []
+    },
     viewMode: "normal",
     selectedId: null,
     page: "all",
@@ -107,6 +118,22 @@
     return null;
   }
 
+  function sanitizeFilters(rawFilters) {
+    var safe = rawFilters && typeof rawFilters === "object" ? rawFilters : {};
+    var selectedTags = Array.isArray(safe.selectedTags)
+      ? safe.selectedTags.map(trimText).filter(Boolean)
+      : [];
+
+    return {
+      onair: Boolean(safe.onair),
+      unwatched: Boolean(safe.unwatched),
+      year: Boolean(safe.year),
+      yearValue: trimText(safe.yearValue),
+      tag: Boolean(safe.tag),
+      selectedTags: selectedTags
+    };
+  }
+
   function loadState() {
     var saved = localStorage.getItem(APP_KEY);
     if (saved) {
@@ -116,6 +143,7 @@
           state.animes = parsed.animes.map(sanitizeAnime);
           state.searchQuery = String(parsed.searchQuery || "");
           state.sortMode = isValidSort(parsed.sortMode) ? parsed.sortMode : "none";
+          state.filters = sanitizeFilters(parsed.filters);
           state.viewMode = parsed.viewMode === "compact" ? "compact" : "normal";
           state.selectedId = parsed.selectedId || null;
           
@@ -160,6 +188,7 @@
       animes: state.animes,
       searchQuery: state.searchQuery,
       sortMode: state.sortMode,
+      filters: state.filters,
       viewMode: state.viewMode,
       selectedId: state.selectedId
     }));
@@ -251,19 +280,171 @@
     }
   }
 
+  function normalizedHost(url) {
+    try {
+      return new URL(url).hostname.toLowerCase();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function getLinkLabel(url) {
+    var host = normalizedHost(url);
+    if (host === BAHAMUT_META_HOST) {
+      return "Bahamut";
+    }
+    return extractDomain(url);
+  }
+
+  function extractYearFromDate(dateValue) {
+    var value = String(dateValue || "");
+    var match = value.match(/^(\d{4})/);
+    if (!match) {
+      return null;
+    }
+    return Number(match[1]);
+  }
+
+  function animeMatchesYear(anime, yearNumber) {
+    if (Number(anime.year) === yearNumber) {
+      return true;
+    }
+
+    if (!Array.isArray(anime.series)) {
+      return false;
+    }
+
+    return anime.series.some(function (seriesItem) {
+      return extractYearFromDate(seriesItem.date) === yearNumber;
+    });
+  }
+
+  function animePassesFilter(item) {
+    var filters = state.filters;
+
+    if (filters.onair && !item.onair) {
+      return false;
+    }
+
+    if (filters.unwatched && !item.unwatched) {
+      return false;
+    }
+
+    if (filters.year) {
+      var yearNumber = Number(filters.yearValue);
+      if (String(filters.yearValue) && Number.isFinite(yearNumber) && !animeMatchesYear(item, yearNumber)) {
+        return false;
+      }
+    }
+
+    if (filters.tag && filters.selectedTags.length) {
+      var hasAllSelectedTags = filters.selectedTags.every(function (selectedTag) {
+        return item.tags.indexOf(selectedTag) >= 0;
+      });
+      if (!hasAllSelectedTags) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function getAllTags() {
+    var tagSet = {};
+    state.animes.forEach(function (anime) {
+      anime.tags.forEach(function (tag) {
+        tagSet[tag] = true;
+      });
+    });
+    return Object.keys(tagSet).sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+  }
+
+  function filterTagOptionsHtml(tags) {
+    if (!tags.length) {
+      return '<div class="filter-empty">No tags in data</div>';
+    }
+
+    return tags.map(function (tag) {
+      var checked = state.filters.selectedTags.indexOf(tag) >= 0;
+      return '<label class="filter-pill">' +
+        '<input type="checkbox" data-tag-filter="' + escapeHtml(tag) + '" ' + (checked ? "checked" : "") + ' />' +
+        '<span>' + escapeHtml(tag) + '</span>' +
+        '</label>';
+    }).join("");
+  }
+
+  function hasActiveFilter() {
+    if (state.filters.onair || state.filters.unwatched || state.filters.tag) {
+      return true;
+    }
+    if (state.filters.year && state.filters.yearValue) {
+      return true;
+    }
+    return false;
+  }
+
+  function animateFilteredResults() {
+    var resultsElement = document.getElementById("all-results");
+    if (!resultsElement || !hasActiveFilter()) {
+      return;
+    }
+
+    resultsElement.classList.remove("filter-pop");
+    void resultsElement.offsetWidth;
+    resultsElement.classList.add("filter-pop");
+  }
+
   function filteredAnimes() {
     var q = state.searchQuery.toLowerCase();
-    if (!q) {
-      return state.animes.slice();
-    }
+
     return state.animes.filter(function (item) {
-      var seriesMatch = Array.isArray(item.series) && item.series.some(function (seriesItem) {
-        return String(seriesItem.name || "").toLowerCase().indexOf(q) >= 0;
-      });
-      return item.title.toLowerCase().indexOf(q) >= 0 ||
-        item.originalTitle.toLowerCase().indexOf(q) >= 0 ||
-        seriesMatch;
+      var matchSearch = true;
+
+      if (q) {
+        var seriesMatch = Array.isArray(item.series) && item.series.some(function (seriesItem) {
+          return String(seriesItem.name || "").toLowerCase().indexOf(q) >= 0;
+        });
+        matchSearch = item.title.toLowerCase().indexOf(q) >= 0 ||
+          item.originalTitle.toLowerCase().indexOf(q) >= 0 ||
+          seriesMatch;
+      }
+
+      if (!matchSearch) {
+        return false;
+      }
+
+      return animePassesFilter(item);
     });
+  }
+
+  function syncFilterUi() {
+    var onairChip = document.getElementById("filter-onair");
+    var unwatchedChip = document.getElementById("filter-unwatched");
+    var yearChip = document.getElementById("filter-year");
+    var tagChip = document.getElementById("filter-tag");
+    var yearInput = document.getElementById("filter-year-input");
+    var tagPanel = document.getElementById("filter-tag-panel");
+
+    if (onairChip) {
+      onairChip.classList.toggle("active", state.filters.onair);
+    }
+    if (unwatchedChip) {
+      unwatchedChip.classList.toggle("active", state.filters.unwatched);
+    }
+    if (yearChip) {
+      yearChip.classList.toggle("active", state.filters.year);
+    }
+    if (tagChip) {
+      tagChip.classList.toggle("active", state.filters.tag);
+    }
+    if (yearInput) {
+      yearInput.hidden = !state.filters.year;
+    }
+    if (tagPanel) {
+      tagPanel.hidden = !state.filters.tag;
+    }
   }
 
   function sortedAnimes(list) {
@@ -430,6 +611,7 @@
     }
 
     resultsElement.innerHTML = listHtmlFor(sortedAnimes(filteredAnimes()));
+    animateFilteredResults();
   }
 
   function syncSortUi() {
@@ -456,6 +638,8 @@
   }
 
   function renderAllPage() {
+    var allTags = getAllTags();
+
     appRoot.innerHTML = `
       <section class="page">
         <div class="card toolbar">
@@ -471,6 +655,24 @@
             <button type="button" data-view="normal" class="toggle-option ${state.viewMode === "normal" ? "active" : ""}">Normal</button>
           </div>
         </div>
+        <div class="card filter-strip">
+          <div class="filter-row">
+            <button type="button" class="filter-chip ${state.filters.onair ? "active" : ""}" id="filter-onair">On Air</button>
+            <button type="button" class="filter-chip ${state.filters.unwatched ? "active" : ""}" id="filter-unwatched">Unwatched</button>
+            <div class="filter-with-input">
+              <button type="button" class="filter-chip ${state.filters.year ? "active" : ""}" id="filter-year">Year</button>
+              <input id="filter-year-input" class="filter-input" type="number" min="1910" max="2100" placeholder="Type year" value="${escapeHtml(state.filters.yearValue)}" ${state.filters.year ? "" : "hidden"} />
+            </div>
+            <div class="filter-with-panel">
+              <button type="button" class="filter-chip ${state.filters.tag ? "active" : ""}" id="filter-tag">Tag${state.filters.selectedTags.length ? " (" + state.filters.selectedTags.length + ")" : ""}</button>
+              <div class="filter-tag-row" id="filter-tag-panel" ${state.filters.tag ? "" : "hidden"}>
+                <div class="filter-tag-scroll">
+                  ${filterTagOptionsHtml(allTags)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="card list-wrap"><div id="all-results"></div></div>
       </section>
     `;
@@ -481,6 +683,12 @@
     var sortButton = document.getElementById("sort-button");
     var sortClear = document.getElementById("sort-clear");
     var sortPopover = document.getElementById("sort-popover");
+    var onairFilter = document.getElementById("filter-onair");
+    var unwatchedFilter = document.getElementById("filter-unwatched");
+    var yearFilter = document.getElementById("filter-year");
+    var yearInput = document.getElementById("filter-year-input");
+    var tagFilter = document.getElementById("filter-tag");
+    var tagPanel = document.getElementById("filter-tag-panel");
     var resultsWrap = document.getElementById("all-results");
 
     searchInput.addEventListener("input", function (event) {
@@ -499,9 +707,69 @@
 
     sortClear.addEventListener("click", function () {
       state.sortMode = "none";
+      state.searchQuery = "";
+      searchInput.value = "";
       saveState();
       syncSortUi();
       updateAllResults();
+    });
+
+    onairFilter.addEventListener("click", function () {
+      state.filters.onair = !state.filters.onair;
+      saveState();
+      syncFilterUi();
+      updateAllResults();
+    });
+
+    unwatchedFilter.addEventListener("click", function () {
+      state.filters.unwatched = !state.filters.unwatched;
+      saveState();
+      syncFilterUi();
+      updateAllResults();
+    });
+
+    yearFilter.addEventListener("click", function () {
+      state.filters.year = !state.filters.year;
+      saveState();
+      syncFilterUi();
+      updateAllResults();
+    });
+
+    yearInput.addEventListener("input", function (event) {
+      state.filters.yearValue = trimText(event.target.value);
+      saveState();
+      updateAllResults();
+    });
+
+    tagFilter.addEventListener("click", function () {
+      state.filters.tag = !state.filters.tag;
+      saveState();
+      syncFilterUi();
+      updateAllResults();
+    });
+
+    tagPanel.addEventListener("change", function (event) {
+      var target = event.target;
+      if (!target || target.type !== "checkbox") {
+        return;
+      }
+      var tag = target.getAttribute("data-tag-filter");
+      if (!tag) {
+        return;
+      }
+
+      if (target.checked) {
+        if (state.filters.selectedTags.indexOf(tag) < 0) {
+          state.filters.selectedTags.push(tag);
+        }
+      } else {
+        state.filters.selectedTags = state.filters.selectedTags.filter(function (entry) {
+          return entry !== tag;
+        });
+      }
+
+      saveState();
+      renderAllPage();
     });
 
     Array.prototype.forEach.call(appRoot.querySelectorAll(".sort-option"), function (button) {
@@ -521,6 +789,8 @@
         renderAllPage();
       });
     });
+
+    syncFilterUi();
 
     resultsWrap.addEventListener("click", function (event) {
       var card = event.target.closest("[data-id]");
@@ -578,7 +848,7 @@
             <div class="meta-item"><label>Year</label><div>${escapeHtml(String(anime.year))}</div></div>
             <div class="meta-item"><label>Stars</label><div class="stars">${anime.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(anime.stars))}</div></div>
             <div class="meta-item"><label>Tags</label><div class="tags">${anime.tags.length ? anime.tags.map(function (tag) { return '<span class="tag">' + escapeHtml(tag) + '</span>'; }).join("") : '<span class="tag">No tags</span>'}</div></div>
-            <div class="meta-item"><label>Link</label><div>${anime.link ? (anime.link.indexOf(',') >= 0 ? anime.link.split(',').map(function(link) { var trimmed = trimText(link); return trimmed ? '<a href="' + escapeHtml(trimmed) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(extractDomain(trimmed)) + '</a>' : ''; }).filter(Boolean).join(', ') : '<a href="' + escapeHtml(anime.link) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(extractDomain(anime.link)) + '</a>') : 'No link'}</div></div>
+            <div class="meta-item"><label>Link</label><div>${anime.link ? (anime.link.indexOf(',') >= 0 ? anime.link.split(',').map(function(link) { var trimmed = trimText(link); return trimmed ? '<a href="' + escapeHtml(trimmed) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(getLinkLabel(trimmed)) + '</a>' : ''; }).filter(Boolean).join(', ') : '<a href="' + escapeHtml(anime.link) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(getLinkLabel(anime.link)) + '</a>') : 'No link'}</div></div>
           </div>
           <div class="series-section expanded"><h3 class="expanded">Series</h3><div class="series-list">${seriesTableHtml(anime.series)}</div></div>
           <div>
@@ -586,7 +856,7 @@
             <p class="note">${escapeHtml(anime.note || "No notes yet.")}</p>
           </div>
           <div class="detail-footer">
-            ${anime.lastEdited ? 'Last edited: ' + escapeHtml(formatDate(anime.lastEdited)) : 'Never edited'}
+            ${anime.lastEdited ? 'Last edited: ' + escapeHtml(formatDate(anime.lastEdited)) : 'Never edited'}${normalizedHost(anime.thumbnail) === BAHAMUT_PHOTO_HOST ? ' | Photo: Bahamut' : ''}
           </div>
         </article>
       </section>
@@ -902,6 +1172,7 @@
       loadDefaultAnime().then(function () {
         state.searchQuery = "";
         state.sortMode = "none";
+        state.filters = sanitizeFilters(null);
         state.viewMode = "normal";
         saveState();
         navigate("#all");
