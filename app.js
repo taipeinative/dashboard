@@ -33,6 +33,7 @@
     viewMode: "normal",
     selectedId: null,
     page: "all",
+    filterPanelOpen: false,
     editMode: "edit",
     preEditReturnId: null
   };
@@ -56,6 +57,10 @@
 
   function iconSort() {
     return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3"></path></svg>';
+  }
+
+  function iconFilter() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>';
   }
 
   function iconX() {
@@ -426,6 +431,7 @@
     var tagChip = document.getElementById("filter-tag");
     var yearInput = document.getElementById("filter-year-input");
     var tagPanel = document.getElementById("filter-tag-panel");
+    var filterButton = document.getElementById("filter-button");
 
     if (onairChip) {
       onairChip.classList.toggle("active", state.filters.onair);
@@ -444,6 +450,10 @@
     }
     if (tagPanel) {
       tagPanel.hidden = !state.filters.tag;
+    }
+    if (filterButton) {
+      filterButton.classList.toggle("active", hasActiveFilter());
+      filterButton.setAttribute("aria-expanded", state.filterPanelOpen ? "true" : "false");
     }
   }
 
@@ -488,8 +498,13 @@
 
   function parseHash() {
     var hash = window.location.hash.replace(/^#/, "");
-    if (!hash || hash === "all") {
+    if (!hash) {
       state.page = "all";
+      state.filterPanelOpen = false;
+      return;
+    }
+    if (hash === "all") {
+      navigate("#");
       return;
     }
     if (hash.indexOf("detail/") === 0) {
@@ -498,11 +513,13 @@
         state.selectedId = detailId;
       }
       state.page = "detail";
+      state.filterPanelOpen = false;
       return;
     }
     if (hash === "edit/new") {
       state.page = "edit";
       state.editMode = "new";
+      state.filterPanelOpen = false;
       return;
     }
     if (hash.indexOf("edit/") === 0) {
@@ -511,10 +528,12 @@
         state.selectedId = editId;
         state.page = "edit";
         state.editMode = "edit";
+        state.filterPanelOpen = false;
         return;
       }
     }
     state.page = "all";
+    state.filterPanelOpen = false;
   }
 
   function navigate(path) {
@@ -595,6 +614,7 @@
   function updateAllResults() {
     var optionsElement = document.getElementById("title-options");
     var resultsElement = document.getElementById("all-results");
+    var summaryElement = document.getElementById("result-summary");
     if (!optionsElement || !resultsElement) {
       return;
     }
@@ -610,7 +630,11 @@
       optionsElement.innerHTML = "";
     }
 
-    resultsElement.innerHTML = listHtmlFor(sortedAnimes(filteredAnimes()));
+    var filtered = filteredAnimes();
+    resultsElement.innerHTML = listHtmlFor(sortedAnimes(filtered));
+    if (summaryElement) {
+      summaryElement.textContent = "Showing " + filtered.length + " out of " + state.animes.length + " anime(s)";
+    }
     animateFilteredResults();
   }
 
@@ -618,9 +642,10 @@
     var clearButton = document.getElementById("sort-clear");
     var sortButton = document.getElementById("sort-button");
     var options = appRoot.querySelectorAll(".sort-option");
+    var shouldShowClear = state.sortMode !== "none" || Boolean(state.searchQuery) || hasActiveFilter();
 
     if (clearButton) {
-      clearButton.hidden = state.sortMode === "none";
+      clearButton.hidden = !shouldShowClear;
     }
 
     if (sortButton) {
@@ -641,12 +666,13 @@
     var allTags = getAllTags();
 
     appRoot.innerHTML = `
-      <section class="page">
+      <section class="page ${state.filterPanelOpen ? "filter-open" : ""}">
         <div class="card toolbar">
           <input id="search-input" class="search-input" list="title-options" placeholder="Search anime title..." value="${escapeHtml(state.searchQuery)}" />
           <datalist id="title-options"></datalist>
           <div class="sort-tools">
             <button class="icon-button" id="sort-button" type="button" aria-label="Sort list" title="Sort list">${iconSort()}</button>
+            <button class="icon-button" id="filter-button" type="button" aria-label="Open filters" title="Open filters" aria-expanded="${state.filterPanelOpen ? "true" : "false"}">${iconFilter()}</button>
             <button class="icon-button sort-clear" id="sort-clear" type="button" aria-label="Clear sort" title="Clear sort" ${state.sortMode === "none" ? "hidden" : ""}>${iconX()}</button>
             <div class="sort-popover" id="sort-popover" hidden>${sortOptionsHtml()}</div>
           </div>
@@ -655,21 +681,31 @@
             <button type="button" data-view="normal" class="toggle-option ${state.viewMode === "normal" ? "active" : ""}">Normal</button>
           </div>
         </div>
-        <div class="card filter-strip">
-          <div class="filter-row">
-            <button type="button" class="filter-chip ${state.filters.onair ? "active" : ""}" id="filter-onair">On Air</button>
-            <button type="button" class="filter-chip ${state.filters.unwatched ? "active" : ""}" id="filter-unwatched">Unwatched</button>
-            <div class="filter-with-input">
-              <button type="button" class="filter-chip ${state.filters.year ? "active" : ""}" id="filter-year">Year</button>
-              <input id="filter-year-input" class="filter-input" type="number" min="1910" max="2100" placeholder="Type year" value="${escapeHtml(state.filters.yearValue)}" ${state.filters.year ? "" : "hidden"} />
+        <div class="result-summary-wrap">
+          <p id="result-summary" class="result-summary">Showing 0 out of 0 anime(s)</p>
+        </div>
+        <div class="filter-overlay ${state.filterPanelOpen ? "open" : ""}" id="filter-overlay" ${state.filterPanelOpen ? "" : "hidden"}>
+          <div class="filter-modal card" role="dialog" aria-modal="true" aria-labelledby="filter-title">
+            <div class="filter-modal-head">
+              <h3 id="filter-title">Filter</h3>
+              <button class="icon-button" id="filter-close" type="button" aria-label="Close filters" title="Close filters">${iconX()}</button>
             </div>
-            <div class="filter-with-panel">
-              <button type="button" class="filter-chip ${state.filters.tag ? "active" : ""}" id="filter-tag">Tag${state.filters.selectedTags.length ? " (" + state.filters.selectedTags.length + ")" : ""}</button>
-              <div class="filter-tag-row" id="filter-tag-panel" ${state.filters.tag ? "" : "hidden"}>
-                <div class="filter-tag-scroll">
-                  ${filterTagOptionsHtml(allTags)}
-                </div>
+            <div class="filter-row">
+              <button type="button" class="filter-chip ${state.filters.onair ? "active" : ""}" id="filter-onair">On Air</button>
+              <button type="button" class="filter-chip ${state.filters.unwatched ? "active" : ""}" id="filter-unwatched">Unwatched</button>
+              <div class="filter-with-input">
+                <button type="button" class="filter-chip ${state.filters.year ? "active" : ""}" id="filter-year">Year</button>
+                <input id="filter-year-input" class="filter-input" type="number" min="1910" max="2100" placeholder="Type year" value="${escapeHtml(state.filters.yearValue)}" ${state.filters.year ? "" : "hidden"} />
               </div>
+              <button type="button" class="filter-chip ${state.filters.tag ? "active" : ""}" id="filter-tag">Tag${state.filters.selectedTags.length ? " (" + state.filters.selectedTags.length + ")" : ""}</button>
+            </div>
+            <div class="filter-tag-row filter-tag-row-block" id="filter-tag-panel" ${state.filters.tag ? "" : "hidden"}>
+              <div class="filter-tag-scroll">
+                ${filterTagOptionsHtml(allTags)}
+              </div>
+            </div>
+            <div class="filter-modal-actions">
+              <button type="button" class="secondary-button" id="filter-reset">Reset filters</button>
             </div>
           </div>
         </div>
@@ -681,8 +717,13 @@
     syncSortUi();
     var searchInput = document.getElementById("search-input");
     var sortButton = document.getElementById("sort-button");
+    var filterButton = document.getElementById("filter-button");
     var sortClear = document.getElementById("sort-clear");
     var sortPopover = document.getElementById("sort-popover");
+    var filterOverlay = document.getElementById("filter-overlay");
+    var filterModal = appRoot.querySelector(".filter-modal");
+    var filterClose = document.getElementById("filter-close");
+    var filterReset = document.getElementById("filter-reset");
     var onairFilter = document.getElementById("filter-onair");
     var unwatchedFilter = document.getElementById("filter-unwatched");
     var yearFilter = document.getElementById("filter-year");
@@ -690,6 +731,40 @@
     var tagFilter = document.getElementById("filter-tag");
     var tagPanel = document.getElementById("filter-tag-panel");
     var resultsWrap = document.getElementById("all-results");
+    var pageSection = appRoot.querySelector(".page");
+
+    function onFilterEscape(event) {
+      if (event.key === "Escape") {
+        setFilterPanelOpen(false);
+      }
+    }
+
+    function setFilterPanelOpen(open) {
+      var wasOpen = state.filterPanelOpen;
+      state.filterPanelOpen = Boolean(open);
+      document.removeEventListener("keydown", onFilterEscape);
+
+      if (filterModal) {
+        filterModal.classList.remove("animate-in");
+      }
+
+      if (state.filterPanelOpen) {
+        filterOverlay.removeAttribute("hidden");
+        filterOverlay.classList.add("open");
+        pageSection.classList.add("filter-open");
+        if (!wasOpen && filterModal) {
+          filterModal.classList.add("animate-in");
+        }
+        document.addEventListener("keydown", onFilterEscape);
+      } else {
+        filterOverlay.classList.remove("open");
+        filterOverlay.setAttribute("hidden", "hidden");
+        pageSection.classList.remove("filter-open");
+      }
+      syncFilterUi();
+    }
+
+    setFilterPanelOpen(state.filterPanelOpen);
 
     searchInput.addEventListener("input", function (event) {
       state.searchQuery = trimText(event.target.value);
@@ -705,13 +780,34 @@
       }
     });
 
+    filterButton.addEventListener("click", function () {
+      setFilterPanelOpen(!state.filterPanelOpen);
+    });
+
+    filterClose.addEventListener("click", function () {
+      setFilterPanelOpen(false);
+    });
+
+    filterOverlay.addEventListener("click", function (event) {
+      if (event.target === filterOverlay) {
+        setFilterPanelOpen(false);
+      }
+    });
+
+    filterReset.addEventListener("click", function () {
+      state.filters = sanitizeFilters(null);
+      saveState();
+      renderAllPage();
+    });
+
     sortClear.addEventListener("click", function () {
       state.sortMode = "none";
       state.searchQuery = "";
+      state.filters = sanitizeFilters(null);
       searchInput.value = "";
       saveState();
       syncSortUi();
-      updateAllResults();
+      renderAllPage();
     });
 
     onairFilter.addEventListener("click", function () {
@@ -745,7 +841,7 @@
       state.filters.tag = !state.filters.tag;
       saveState();
       syncFilterUi();
-      updateAllResults();
+      renderAllPage();
     });
 
     tagPanel.addEventListener("change", function (event) {
@@ -856,14 +952,14 @@
             <p class="note">${escapeHtml(anime.note || "No notes yet.")}</p>
           </div>
           <div class="detail-footer">
-            ${anime.lastEdited ? 'Last edited: ' + escapeHtml(formatDate(anime.lastEdited)) : 'Never edited'}${normalizedHost(anime.thumbnail) === BAHAMUT_PHOTO_HOST ? ' | Photo: Bahamut' : ''}
+            ${anime.lastEdited ? 'Last edited: ' + escapeHtml(formatDate(anime.lastEdited)) : 'Never edited'}${normalizedHost(anime.thumbnail) === BAHAMUT_PHOTO_HOST ? ' · Photo: Bahamut' : ''}
           </div>
         </article>
       </section>
     `;
 
     document.getElementById("back-button").addEventListener("click", function () {
-      navigate("#all");
+      navigate("#");
     });
 
     function openEdit() {
@@ -879,7 +975,7 @@
         });
         state.selectedId = state.animes[0] ? state.animes[0].id : null;
         saveState();
-        navigate("#all");
+        navigate("#");
       }
     }
 
@@ -925,7 +1021,7 @@
       : findById(state.selectedId);
 
     if (!anime) {
-      navigate("#all");
+      navigate("#");
       return;
     }
 
@@ -976,7 +1072,7 @@
       if (state.preEditReturnId && findById(state.preEditReturnId)) {
         navigate("#detail/" + state.preEditReturnId);
       } else {
-        navigate("#all");
+        navigate("#");
       }
     });
 
@@ -1159,11 +1255,19 @@
   loadState().then(function () {
     initTheme();
     parseHash();
-    if (!window.location.hash) {
-      navigate("#all");
-    } else {
+
+    // Render immediately so entering /# or an empty hash never leaves a blank main page.
+    if (!window.location.hash || window.location.hash === "#") {
+      state.page = "all";
+      state.filterPanelOpen = false;
       render();
+      if (window.location.hash !== "#") {
+        window.location.hash = "#";
+      }
+      return;
     }
+
+    render();
   });
 
   window.clearAnimeDashboardStorage = function () {
@@ -1175,7 +1279,7 @@
         state.filters = sanitizeFilters(null);
         state.viewMode = "normal";
         saveState();
-        navigate("#all");
+        navigate("#");
         console.log("Local storage cleared and reset to default anime list.");
       });
     }
