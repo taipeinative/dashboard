@@ -496,6 +496,61 @@
       .replace(/'/g, "&#39;");
   }
 
+  function ordinalSuffix(value) {
+    var num = Math.abs(Number(value));
+    if (!Number.isFinite(num)) {
+      return value + "th";
+    }
+    var mod100 = num % 100;
+    if (mod100 >= 11 && mod100 <= 13) {
+      return num + "th";
+    }
+    var mod10 = num % 10;
+    if (mod10 === 1) {
+      return num + "st";
+    }
+    if (mod10 === 2) {
+      return num + "nd";
+    }
+    if (mod10 === 3) {
+      return num + "rd";
+    }
+    return num + "th";
+  }
+
+  function badgeToneClass(value) {
+    var num = Number(value);
+    if (!Number.isFinite(num)) {
+      return "tone-1";
+    }
+    var index = ((Math.max(1, Math.floor(num)) - 1) % 5) + 1;
+    return "tone-" + index;
+  }
+
+  function renderNoteMarkdown(rawText) {
+    var safeText = escapeHtml(rawText || "");
+
+    safeText = safeText.replace(/\{\s*([^|\s]+)\s*\|\s*([^}]+)\s*\}/g, function (match, count, dateText) {
+      var ordinalText = ordinalSuffix(count);
+      var labelText = ordinalText + " watched on " + dateText;
+      return '<span class="note-badge ' + badgeToneClass(count) + '" data-count="' + count +
+        '" data-date="' + dateText + '" data-label="' + labelText + '">' +
+        '<span class="note-badge-body">' +
+        '<span class="note-badge-count">' + count + '</span>' +
+        '<span class="note-badge-date">' + dateText + '</span>' +
+        '</span>' +
+        '<span class="note-badge-pop">' + labelText + '</span>' +
+        '</span>';
+    });
+
+    safeText = safeText.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    safeText = safeText.replace(/__([^_]+)__/g, "<u>$1</u>");
+    safeText = safeText.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+    safeText = safeText.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+    return safeText.replace(/\n/g, "<br />");
+  }
+
   function parseHash() {
     var hash = window.location.hash.replace(/^#/, "");
     if (!hash) {
@@ -949,7 +1004,7 @@
           <div class="series-section expanded"><h3 class="expanded">Series</h3><div class="series-list">${seriesTableHtml(anime.series)}</div></div>
           <div>
             <h3>Note</h3>
-            <p class="note">${escapeHtml(anime.note || "No notes yet.")}</p>
+            <p class="note note-markdown">${renderNoteMarkdown(anime.note || "No notes yet.")}</p>
           </div>
           <div class="detail-footer">
             ${anime.lastEdited ? 'Last edited: ' + escapeHtml(formatDate(anime.lastEdited)) : 'Never edited'}${normalizedHost(anime.thumbnail) === BAHAMUT_PHOTO_HOST ? ' · Photo: Bahamut' : ''}
@@ -999,6 +1054,47 @@
         seriesHeading.classList.toggle("expanded");
       });
     }
+
+    bindNoteBadgeInteractions(appRoot);
+  }
+
+  function bindNoteBadgeInteractions(container) {
+    if (!container) {
+      return;
+    }
+
+    if (container.getAttribute("data-badge-bound") === "true") {
+      return;
+    }
+    container.setAttribute("data-badge-bound", "true");
+
+    if (!bindNoteBadgeInteractions.closeHandlerAttached) {
+      document.addEventListener("click", function () {
+        Array.prototype.forEach.call(document.querySelectorAll(".note-badge.is-open"), function (badge) {
+          badge.classList.remove("is-open");
+        });
+      });
+      bindNoteBadgeInteractions.closeHandlerAttached = true;
+    }
+
+    function closeAllBadges() {
+      Array.prototype.forEach.call(container.querySelectorAll(".note-badge.is-open"), function (badge) {
+        badge.classList.remove("is-open");
+      });
+    }
+
+    container.addEventListener("click", function (event) {
+      var badge = event.target.closest(".note-badge");
+      if (!badge || !container.contains(badge)) {
+        return;
+      }
+      event.stopPropagation();
+      var isOpen = badge.classList.contains("is-open");
+      closeAllBadges();
+      if (!isOpen) {
+        badge.classList.add("is-open");
+      }
+    });
   }
 
   function renderEditPage() {
@@ -1054,6 +1150,7 @@
             </div>
             <div class="field"><label for="thumbnail">Thumbnail URL</label><input class="input" id="thumbnail" name="thumbnail" type="url" value="${escapeHtml(anime.thumbnail)}" /></div>
             <div class="field"><label for="note">Note</label><textarea id="note" name="note">${escapeHtml(anime.note)}</textarea></div>
+            <div class="field"><label>Note Preview</label><div id="note-preview" class="note-preview"></div></div>
             <div class="form-actions">
               <button type="button" class="secondary-button" id="discard">Discard</button>
               <button type="submit" class="primary-button">Save</button>
@@ -1092,7 +1189,16 @@
     var unwatchedInput = document.getElementById("unwatched");
     var seriesEditor = document.getElementById("series-editor");
     var seriesAdd = document.getElementById("series-add");
+    var noteInput = document.getElementById("note");
+    var notePreview = document.getElementById("note-preview");
     var draggingSeries = null;
+
+    function updateNotePreview() {
+      if (notePreview) {
+        notePreview.innerHTML = renderNoteMarkdown(noteInput.value);
+        bindNoteBadgeInteractions(notePreview);
+      }
+    }
 
     function syncStarsDisabled() {
       starsInput.disabled = unwatchedInput.checked;
@@ -1157,6 +1263,8 @@
     unwatchedInput.addEventListener("change", syncStarsDisabled);
     syncStarsDisabled();
     installSeriesHandlers();
+    updateNotePreview();
+    noteInput.addEventListener("input", updateNotePreview);
 
     seriesAdd.addEventListener("click", function () {
       var id = "s-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
