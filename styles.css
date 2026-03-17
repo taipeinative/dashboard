@@ -48,6 +48,7 @@
   --badge-5-count-text: #ffffff;
   --badge-5-date-bg: #e6f0ff;
   --badge-5-date-text: #1f3f73;
+  --season-list-even-items: #e4f1ee;
   --shadow: 0 10px 30px rgba(25, 41, 69, 0.12);
   --chip: #c2e5df;
 }
@@ -90,6 +91,7 @@ body[data-theme="dark"] {
   --badge-5-count-text: #0c1a2e;
   --badge-5-date-bg: #1a2330;
   --badge-5-date-text: #d9e7ff;
+  --season-list-even-items: #303f52;
   --shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
   --chip: #303f52;
 }
@@ -1011,7 +1013,7 @@ a {
 }
 
 .series-table tr:nth-child(even) td {
-  background: var(--chip);
+  background: var(--season-list-even-items);
 }
 
 .series-col-name {

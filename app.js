@@ -7,10 +7,12 @@
     { id: "none", label: "No sorting" },
     { id: "title-asc", label: "Title (A-Z)" },
     { id: "title-desc", label: "Title (Z-A)" },
-    { id: "year-asc", label: "Year (old-new)" },
-    { id: "year-desc", label: "Year (new-old)" },
-    { id: "stars-asc", label: "Stars (low-high)" },
-    { id: "stars-desc", label: "Stars (high-low)" }
+    { id: "year-asc", label: "Year (oldest)" },
+    { id: "year-desc", label: "Year (newest)" },
+    { id: "stars-asc", label: "Stars (lowest)" },
+    { id: "stars-desc", label: "Stars (highest)" },
+    { id: "edited-asc", label: "Last edited (oldest)" },
+    { id: "edited-desc", label: "Last edited (newest)" }
   ];
 
   var DEFAULT_ANIME_URL = "./default-anime.json";
@@ -480,6 +482,12 @@
       }
       if (mode === "stars-asc") {
         return a.stars - b.stars;
+      }
+      if (mode === "edited-desc") {
+        return (b.lastEdited || "").localeCompare(a.lastEdited || "");
+      }
+      if (mode === "edited-asc") {
+        return (a.lastEdited || "").localeCompare(b.lastEdited || "");
       }
       return b.stars - a.stars;
     });
