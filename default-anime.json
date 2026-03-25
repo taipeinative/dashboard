@@ -7,22 +7,22 @@
     "tags": [
       "科幻"
     ],
-    "stars": 3,
-    "unwatched": true,
-    "onair": true,
+    "stars": 4.8,
+    "unwatched": false,
+    "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=142615",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/15/0000142615.JPG",
-    "note": "",
+    "note": "**S1**　{1|2026-03-25}\n\n看完整個起雞皮疙瘩，沒想到狼人殺遊戲能夠被改編成這麼優秀的動畫。除了一些為了維持遊戲進行的硬設定（例如：為什麼要投票→不投票，AI 就讓太空船自爆、為什麼複數古諾西亞每晚只能抹去一個人→連他們自己都不知道 ~~不這樣設計好人怎麼贏~~）外，整體敘事流暢，看得很過癮。相比起槍彈辯駁，本作多了時空輪迴、因果關係的元素，雖然增加了可以發揮的深度，不過腦容量小如我到第 11 集後開始推進主線劇情後就越來越難跟上了，需要閱讀留言區推理／原作大佬們解說才能稍微明白一點。我覺得最精彩的兩局遊戲還是主角尤里第一次當狼和解鎖主線的 15 人局，前者傳達了作為古諾西亞的掙扎與選擇，後者則是展現主角在數十次輪迴中的成長，識破狼方的陷阱並向真相邁進一步。",
     "series": [
       {
         "id": "s-1772823442474-546",
         "name": "S1",
         "date": "2025-10-11",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=142615",
-        "stars": 0
+        "stars": 4.8
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-03-25"
   },
   {
     "id": "a2025100300",
@@ -276,7 +276,7 @@
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=136527",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/27/0000136527.JPG",
-    "note": "",
+    "note": "**S1**　{1|2025-02-13}",
     "series": [
       {
         "id": "s-1772825461309-34",
@@ -286,7 +286,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-03-25"
   },
   {
     "id": "a2024070500",
@@ -670,7 +670,7 @@
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=124429",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/29/0000124429.JPG",
-    "note": "",
+    "note": "**S1**　{1|2024-09-13}",
     "series": [
       {
         "id": "s-1772883268054-859",
@@ -680,7 +680,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-03-25"
   },
   {
     "id": "a2023010900",
@@ -894,7 +894,7 @@
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=120396",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/96/0000120396.JPG",
-    "note": "**S3**　{1|2026-01-08}",
+    "note": "**S3**　{1|2026-01-08}\n\n**Film1**　{1|2024-10-22}",
     "series": [
       {
         "id": "s-1772884248731-887",
@@ -925,7 +925,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-13"
+    "lastEdited": "2026-03-25"
   },
   {
     "id": "a2022040800",
