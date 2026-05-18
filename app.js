@@ -11,6 +11,8 @@
     { id: "year-desc", label: "Year (newest)" },
     { id: "stars-asc", label: "Stars (lowest)" },
     { id: "stars-desc", label: "Stars (highest)" },
+    { id: "watched-asc", label: "Last watched (oldest)" },
+    { id: "watched-desc", label: "Last watched (newest)" },
     { id: "edited-asc", label: "Last edited (oldest)" },
     { id: "edited-desc", label: "Last edited (newest)" }
   ];
@@ -27,6 +29,7 @@
     filters: {
       onair: false,
       unwatched: false,
+      rated: false,
       year: false,
       yearValue: "",
       tag: false,
@@ -44,6 +47,18 @@
   var appRoot = document.getElementById("app");
   var themeButton = document.getElementById("theme-toggle");
   var addTopButton = document.getElementById("add-anime-top");
+
+  var pageEscapeHandler = null;
+
+  function setPageEscapeHandler(nextHandler) {
+    if (pageEscapeHandler) {
+      document.removeEventListener("keydown", pageEscapeHandler);
+    }
+    pageEscapeHandler = typeof nextHandler === "function" ? nextHandler : null;
+    if (pageEscapeHandler) {
+      document.addEventListener("keydown", pageEscapeHandler);
+    }
+  }
 
   function iconMoon() {
     return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 15.2A8.5 8.5 0 1 1 11.8 4a7 7 0 0 0 8.2 11.2z"></path></svg>';
@@ -96,6 +111,7 @@
       tags: Array.isArray(raw.tags) ? raw.tags.map(trimText).filter(Boolean) : [],
       stars: Number.isFinite(stars) ? Math.max(0, Math.min(5, stars)) : 0,
       unwatched: Boolean(raw.unwatched || false),
+      noRating: Boolean(raw.noRating || false),
       onair: Boolean(raw.onair || false),
       link: String(raw.link || ""),
       thumbnail: String(raw.thumbnail || "https://picsum.photos/seed/placeholder/480/270"),
@@ -134,6 +150,7 @@
     return {
       onair: Boolean(safe.onair),
       unwatched: Boolean(safe.unwatched),
+      rated: Boolean(safe.rated),
       year: Boolean(safe.year),
       yearValue: trimText(safe.yearValue),
       tag: Boolean(safe.tag),
@@ -312,6 +329,41 @@
     return Number(match[1]);
   }
 
+  function extractLatestIsoDate(text) {
+    var source = String(text || "");
+    var matches = source.match(/\b\d{4}-\d{2}-\d{2}\b/g);
+    if (!matches || !matches.length) {
+      return "";
+    }
+
+    var latest = "";
+    matches.forEach(function (candidate) {
+      var parsed = new Date(candidate + "T00:00:00Z");
+      if (!Number.isNaN(parsed.getTime()) && candidate > latest) {
+        latest = candidate;
+      }
+    });
+    return latest;
+  }
+
+  function animeHasRatings(anime) {
+    if (!anime || anime.unwatched || anime.noRating) {
+      return false;
+    }
+
+    if (Number(anime.stars) > 0) {
+      return true;
+    }
+
+    if (Array.isArray(anime.series) && anime.series.some(function (seriesItem) {
+      return Number(seriesItem.stars) > 0;
+    })) {
+      return true;
+    }
+
+    return false;
+  }
+
   function animeMatchesYear(anime, yearNumber) {
     if (Number(anime.year) === yearNumber) {
       return true;
@@ -334,6 +386,10 @@
     }
 
     if (filters.unwatched && !item.unwatched) {
+      return false;
+    }
+
+    if (filters.rated && !animeHasRatings(item)) {
       return false;
     }
 
@@ -383,7 +439,7 @@
   }
 
   function hasActiveFilter() {
-    if (state.filters.onair || state.filters.unwatched || state.filters.tag) {
+    if (state.filters.onair || state.filters.unwatched || state.filters.rated || state.filters.tag) {
       return true;
     }
     if (state.filters.year && state.filters.yearValue) {
@@ -429,6 +485,7 @@
   function syncFilterUi() {
     var onairChip = document.getElementById("filter-onair");
     var unwatchedChip = document.getElementById("filter-unwatched");
+    var ratedChip = document.getElementById("filter-rated");
     var yearChip = document.getElementById("filter-year");
     var tagChip = document.getElementById("filter-tag");
     var yearInput = document.getElementById("filter-year-input");
@@ -440,6 +497,9 @@
     }
     if (unwatchedChip) {
       unwatchedChip.classList.toggle("active", state.filters.unwatched);
+    }
+    if (ratedChip) {
+      ratedChip.classList.toggle("active", state.filters.rated);
     }
     if (yearChip) {
       yearChip.classList.toggle("active", state.filters.year);
@@ -463,6 +523,18 @@
     var sorted = list.slice();
     var mode = state.sortMode;
 
+    var watchedCache = {};
+    function watchedKey(anime) {
+      if (!anime) {
+        return "";
+      }
+      if (watchedCache[anime.id] !== undefined) {
+        return watchedCache[anime.id];
+      }
+      watchedCache[anime.id] = extractLatestIsoDate(anime.note);
+      return watchedCache[anime.id];
+    }
+
     if (mode === "none") {
       return sorted;
     }
@@ -482,6 +554,34 @@
       }
       if (mode === "stars-asc") {
         return a.stars - b.stars;
+      }
+      if (mode === "watched-asc") {
+        var aDateAsc = watchedKey(a);
+        var bDateAsc = watchedKey(b);
+        if (!aDateAsc && !bDateAsc) {
+          return 0;
+        }
+        if (!aDateAsc) {
+          return 1;
+        }
+        if (!bDateAsc) {
+          return -1;
+        }
+        return aDateAsc.localeCompare(bDateAsc);
+      }
+      if (mode === "watched-desc") {
+        var aDateDesc = watchedKey(a);
+        var bDateDesc = watchedKey(b);
+        if (!aDateDesc && !bDateDesc) {
+          return 0;
+        }
+        if (!aDateDesc) {
+          return 1;
+        }
+        if (!bDateDesc) {
+          return -1;
+        }
+        return bDateDesc.localeCompare(aDateDesc);
       }
       if (mode === "edited-desc") {
         return (b.lastEdited || "").localeCompare(a.lastEdited || "");
@@ -625,13 +725,23 @@
       return '<div class="empty">No anime matched your search.</div>';
     }
 
+    function starsOrChip(item) {
+      if (item.unwatched) {
+        return '<span class="unwatched">Unwatched</span>';
+      }
+      if (item.noRating) {
+        return '<span class="no-rating">No Rating</span>';
+      }
+      return escapeHtml(starsText(item.stars));
+    }
+
     if (state.viewMode === "compact") {
       return '<ul class="anime-list">' + data.map(function (item) {
         return '<li class="anime-row' + (item.unwatched ? ' is-unwatched' : '') + (item.onair ? ' is-onair' : '') + '" data-id="' + escapeHtml(item.id) + '" tabindex="0">' +
           '<div><strong>' + escapeHtml(item.title) + '</strong>' + (item.onair ? ' <span class="status-chip onair-chip">On Air</span>' : '') + '<br /><small>' +
           escapeHtml(item.originalTitle || "No original title") + '</small></div>' +
           '<small>' + escapeHtml(String(item.year)) + '</small>' +
-          '<span class="stars">' + (item.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(item.stars))) + '</span>' +
+          '<span class="stars">' + starsOrChip(item) + '</span>' +
           '</li>';
       }).join("") + '</ul>';
     }
@@ -642,7 +752,7 @@
         '<div class="anime-card-body">' +
         '<strong>' + escapeHtml(item.title) + '</strong>' +
         '<small>' + escapeHtml(String(item.year)) + (item.onair ? ' <span class="status-chip onair-chip">On Air</span>' : '') + '</small>' +
-        '<span class="stars">' + (item.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(item.stars))) + '</span>' +
+        '<span class="stars">' + starsOrChip(item) + '</span>' +
         '</div></article>';
     }).join("") + '</div>';
   }
@@ -726,6 +836,7 @@
   }
 
   function renderAllPage() {
+    setPageEscapeHandler(null);
     var allTags = getAllTags();
 
     appRoot.innerHTML = `
@@ -756,6 +867,7 @@
             <div class="filter-row">
               <button type="button" class="filter-chip ${state.filters.onair ? "active" : ""}" id="filter-onair">On Air</button>
               <button type="button" class="filter-chip ${state.filters.unwatched ? "active" : ""}" id="filter-unwatched">Unwatched</button>
+              <button type="button" class="filter-chip ${state.filters.rated ? "active" : ""}" id="filter-rated">Rated</button>
               <div class="filter-with-input">
                 <button type="button" class="filter-chip ${state.filters.year ? "active" : ""}" id="filter-year">Year</button>
                 <input id="filter-year-input" class="filter-input" type="number" min="1910" max="2100" placeholder="Type year" value="${escapeHtml(state.filters.yearValue)}" ${state.filters.year ? "" : "hidden"} />
@@ -789,6 +901,7 @@
     var filterReset = document.getElementById("filter-reset");
     var onairFilter = document.getElementById("filter-onair");
     var unwatchedFilter = document.getElementById("filter-unwatched");
+    var ratedFilter = document.getElementById("filter-rated");
     var yearFilter = document.getElementById("filter-year");
     var yearInput = document.getElementById("filter-year-input");
     var tagFilter = document.getElementById("filter-tag");
@@ -887,6 +1000,13 @@
       updateAllResults();
     });
 
+    ratedFilter.addEventListener("click", function () {
+      state.filters.rated = !state.filters.rated;
+      saveState();
+      syncFilterUi();
+      updateAllResults();
+    });
+
     yearFilter.addEventListener("click", function () {
       state.filters.year = !state.filters.year;
       saveState();
@@ -978,6 +1098,13 @@
   }
 
   function renderDetailPage() {
+    setPageEscapeHandler(function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        navigate("#");
+      }
+    });
+
     var anime = findById(state.selectedId);
     if (!anime) {
       appRoot.innerHTML = '<section class="page"><div class="empty">Anime not found.</div></section>';
@@ -1005,7 +1132,7 @@
           <img class="detail-thumb" src="${escapeHtml(anime.thumbnail)}" alt="${escapeHtml(anime.title + " thumbnail")}" />
           <div class="meta-grid">
             <div class="meta-item"><label>Year</label><div>${escapeHtml(String(anime.year))}</div></div>
-            <div class="meta-item"><label>Stars</label><div class="stars">${anime.unwatched ? '<span class="unwatched">Unwatched</span>' : escapeHtml(starsText(anime.stars))}</div></div>
+            <div class="meta-item"><label>Stars</label><div class="stars">${anime.unwatched ? '<span class="unwatched">Unwatched</span>' : (anime.noRating ? '<span class="no-rating">No Rating</span>' : escapeHtml(starsText(anime.stars)))}</div></div>
             <div class="meta-item"><label>Tags</label><div class="tags">${anime.tags.length ? anime.tags.map(function (tag) { return '<span class="tag">' + escapeHtml(tag) + '</span>'; }).join("") : '<span class="tag">No tags</span>'}</div></div>
             <div class="meta-item"><label>Link</label><div>${anime.link ? (anime.link.indexOf(',') >= 0 ? anime.link.split(',').map(function(link) { var trimmed = trimText(link); return trimmed ? '<a href="' + escapeHtml(trimmed) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(getLinkLabel(trimmed)) + '</a>' : ''; }).filter(Boolean).join(', ') : '<a href="' + escapeHtml(anime.link) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(getLinkLabel(anime.link)) + '</a>') : 'No link'}</div></div>
           </div>
@@ -1114,7 +1241,8 @@
           year: new Date().getFullYear(),
           tags: [],
           stars: 3,
-          unwatched: false,
+          unwatched: true,
+          noRating: true,
           onair: false,
           link: "",
           thumbnail: "https://picsum.photos/seed/newanime/480/270",
@@ -1129,6 +1257,26 @@
       return;
     }
 
+    function discardToPreviousPage() {
+      if (state.editMode === "edit") {
+        navigate("#detail/" + anime.id);
+        return;
+      }
+
+      if (state.preEditReturnId && findById(state.preEditReturnId)) {
+        navigate("#detail/" + state.preEditReturnId);
+      } else {
+        navigate("#");
+      }
+    }
+
+    setPageEscapeHandler(function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        discardToPreviousPage();
+      }
+    });
+
     appRoot.innerHTML = `
       <section class="page">
         <article class="card edit-content">
@@ -1138,8 +1286,9 @@
             <div class="field"><label for="originalTitle">Original Title</label><input class="input" id="originalTitle" name="originalTitle" value="${escapeHtml(anime.originalTitle)}" /></div>
             <div class="field"><label for="year">Year</label><input class="input" id="year" name="year" type="number" min="1910" max="2100" value="${escapeHtml(String(anime.year))}" /></div>
             <div class="field"><label for="tags">Tags (comma separated)</label><input class="input" id="tags" name="tags" value="${escapeHtml(anime.tags.join(", "))}" /></div>
-            <div class="field"><label for="stars">Stars (0 to 5)</label><input class="input" id="stars" name="stars" type="number" step="0.1" min="0" max="5" value="${escapeHtml(String(anime.stars))}" ${anime.unwatched ? "disabled" : ""} /></div>
+            <div class="field"><label for="stars">Stars (0 to 5)</label><input class="input" id="stars" name="stars" type="number" step="0.1" min="0" max="5" value="${escapeHtml(String(anime.stars))}" ${(anime.unwatched || anime.noRating) ? "disabled" : ""} /></div>
             <div class="field checkbox-field"><input class="input" id="unwatched" name="unwatched" type="checkbox" ${anime.unwatched ? "checked" : ""} /><label for="unwatched">Mark as unwatched</label></div>
+            <div class="field checkbox-field"><input class="input" id="noRating" name="noRating" type="checkbox" ${anime.noRating ? "checked" : ""} /><label for="noRating">No ratings yet</label></div>
             <div class="field checkbox-field"><input class="input" id="onair" name="onair" type="checkbox" ${anime.onair ? "checked" : ""} /><label for="onair">Currently on air</label></div>
             <div class="field"><label for="link">Website Link</label><input class="input" id="link" name="link" type="url" value="${escapeHtml(anime.link)}" /></div>
             <div class="field"><label>Series</label>
@@ -1150,7 +1299,7 @@
                   '<input class="input series-name" placeholder="Season name" value="' + escapeHtml(s.name) + '" />' +
                   '<input class="input series-date" type="date" value="' + escapeHtml(s.date) + '" />' +
                   '<input class="input series-link" type="url" placeholder="https://..." value="' + escapeHtml(s.link) + '" />' +
-                  '<input class="input series-stars" type="number" min="0" max="5" step="0.1" placeholder="Rating" value="' + escapeHtml(String(s.stars || "")) + '" />' +
+                  '<input class="input series-stars" type="number" min="0" max="5" step="0.1" placeholder="Rating" value="' + escapeHtml(String(s.stars || "")) + '" ' + (anime.noRating ? 'disabled' : '') + ' />' +
                   '</div>' +
                   '</div>';
               }).join("")}</div>
@@ -1168,18 +1317,7 @@
       </section>
     `;
 
-    document.getElementById("discard").addEventListener("click", function () {
-      if (state.editMode === "edit") {
-        navigate("#detail/" + anime.id);
-        return;
-      }
-
-      if (state.preEditReturnId && findById(state.preEditReturnId)) {
-        navigate("#detail/" + state.preEditReturnId);
-      } else {
-        navigate("#");
-      }
-    });
+    document.getElementById("discard").addEventListener("click", discardToPreviousPage);
 
     function seriesEditItemHtml(id) {
       return '<div class="series-edit-item" draggable="false" data-series-id="' + escapeHtml(id) + '">' +
@@ -1188,13 +1326,14 @@
         '<input class="input series-name" placeholder="Season name" />' +
         '<input class="input series-date" type="date" />' +
         '<input class="input series-link" type="url" placeholder="https://..." />' +
-        '<input class="input series-stars" type="number" min="0" max="5" step="0.1" placeholder="Rating" />' +
+        '<input class="input series-stars" type="number" min="0" max="5" step="0.1" placeholder="Rating" ' + ((noRatingInput && noRatingInput.checked) ? 'disabled' : '') + ' />' +
         '</div>' +
         '</div>';
     }
 
     var starsInput = document.getElementById("stars");
     var unwatchedInput = document.getElementById("unwatched");
+    var noRatingInput = document.getElementById("noRating");
     var seriesEditor = document.getElementById("series-editor");
     var seriesAdd = document.getElementById("series-add");
     var noteInput = document.getElementById("note");
@@ -1208,8 +1347,12 @@
       }
     }
 
-    function syncStarsDisabled() {
-      starsInput.disabled = unwatchedInput.checked;
+    function syncRatingInputsDisabled() {
+      starsInput.disabled = unwatchedInput.checked || noRatingInput.checked;
+
+      Array.prototype.forEach.call(seriesEditor.querySelectorAll(".series-stars"), function (input) {
+        input.disabled = noRatingInput.checked;
+      });
     }
 
     function installSeriesHandlers() {
@@ -1268,8 +1411,9 @@
       });
     }
 
-    unwatchedInput.addEventListener("change", syncStarsDisabled);
-    syncStarsDisabled();
+    unwatchedInput.addEventListener("change", syncRatingInputsDisabled);
+    noRatingInput.addEventListener("change", syncRatingInputsDisabled);
+    syncRatingInputsDisabled();
     installSeriesHandlers();
     updateNotePreview();
     noteInput.addEventListener("input", updateNotePreview);
@@ -1278,6 +1422,7 @@
       var id = "s-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
       seriesEditor.insertAdjacentHTML("beforeend", seriesEditItemHtml(id));
       installSeriesHandlers();
+      syncRatingInputsDisabled();
     });
 
     document.getElementById("anime-form").addEventListener("submit", function (event) {
@@ -1298,6 +1443,7 @@
         tags: trimText(form.tags.value).split(","),
         stars: Number(form.stars.value),
         unwatched: form.unwatched.checked,
+        noRating: form.noRating.checked,
         onair: form.onair.checked,
         link: trimText(form.link.value),
         thumbnail: trimText(form.thumbnail.value),

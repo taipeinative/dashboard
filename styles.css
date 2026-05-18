@@ -532,7 +532,7 @@ textarea:focus {
 
 .anime-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 4ch 12ch;
+  grid-template-columns: minmax(0, 1fr) 4ch 14ch;
   gap: 12px;
   align-items: center;
   border: 1px solid var(--border);
@@ -935,6 +935,19 @@ a {
 .unwatched {
   background: var(--accent);
   color: var(--text-inverse);
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-block;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.no-rating {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   padding: 0.35rem 0.65rem;
   border-radius: 8px;
   font-size: 0.88rem;

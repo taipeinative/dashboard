@@ -1,5 +1,59 @@
 [
   {
+    "id": "a2026040701",
+    "title": "婚姻劇毒",
+    "originalTitle": "マリッジトキシン",
+    "year": 2026,
+    "tags": [
+      "動作",
+      "戀愛"
+    ],
+    "stars": 3,
+    "unwatched": true,
+    "noRating": true,
+    "onair": true,
+    "link": "https://acg.gamer.com.tw/acgDetail.php?s=147555",
+    "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/55/0000147555.JPG",
+    "note": "",
+    "series": [
+      {
+        "id": "s-1779126523486-666",
+        "name": "S1",
+        "date": "2026-04-07",
+        "link": "https://acg.gamer.com.tw/acgDetail.php?s=147555",
+        "stars": 0
+      }
+    ],
+    "lastEdited": "2026-05-19"
+  },
+  {
+    "id": "a2026040700",
+    "title": "我和班上第二可愛的女生成為朋友",
+    "originalTitle": "クラスで２番目に可愛い女の子と友だちになった",
+    "year": 2026,
+    "tags": [
+      "戀愛",
+      "校園"
+    ],
+    "stars": 3,
+    "unwatched": true,
+    "noRating": true,
+    "onair": true,
+    "link": "https://acg.gamer.com.tw/acgDetail.php?s=135739",
+    "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/39/0000135739.JPG",
+    "note": "",
+    "series": [
+      {
+        "id": "s-1779126350079-90",
+        "name": "S1",
+        "date": "2026-04-07",
+        "link": "https://acg.gamer.com.tw/acgDetail.php?s=135739",
+        "stars": 0
+      }
+    ],
+    "lastEdited": "2026-05-19"
+  },
+  {
     "id": "a2025101100",
     "title": "GNOSIA",
     "originalTitle": "グノーシア",
@@ -9,6 +63,7 @@
     ],
     "stars": 4.8,
     "unwatched": false,
+    "noRating": false,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=142615",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/15/0000142615.JPG",
@@ -36,6 +91,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=141450",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/50/0000141450.JPG",
@@ -49,7 +105,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-13"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2025070400",
@@ -61,22 +117,23 @@
       "戀愛",
       "校園"
     ],
-    "stars": 3,
+    "stars": 4.7,
     "unwatched": false,
+    "noRating": false,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=140667",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/67/0000140667.JPG",
-    "note": "**S1**　{1|2025-10-05}",
+    "note": "**S1**　{1|2025-10-05}　{2|2026-05-13}\n\n本作講述女主角 莫妮卡．艾瓦雷特 作為王國頂尖的魔法師「七賢人」之一的「沉默魔女」，接下了潛入校園、暗中護衛第二王子菲力克斯的任務，並且與人們交流、自我成長的故事。莫妮卡堪稱魔法界小孤獨，有極度的社交恐懼（童年陰影所致），但在專長領域可謂無人出其右的天才，同時也很可愛。感受得到製作單位很用心，除了有劇中莫妮卡的各種表情包之外，OP 的精緻動畫也讓我感到驚豔。扣分項目主要來自劇情方面，一是第二王子撩人的毛手毛腳使我蠻反感的，二是為了塑造巴尼的負面形象，讓他抓莫妮卡的頭髮、向莫妮卡發射火球等。以拉仇恨值來說是蠻成功的，不過平心而論以巴尼的智商，應該不至於做出在別人學校撒野的行為吧（而且對象還是學生會成員）。最難過的還是中段凱西的部分，莫妮卡少數交到的好友，卻要以這樣的形式離別。",
     "series": [
       {
         "id": "s-1772825082779-570",
         "name": "S1",
         "date": "2025-07-04",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=140667",
-        "stars": 0
+        "stars": 4.7
       }
     ],
-    "lastEdited": "2026-03-13"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2025041000",
@@ -89,6 +146,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=138988",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/88/0000138988.JPG",
@@ -116,6 +174,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=140909",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/09/0000140909.JPG",
@@ -143,6 +202,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=134172",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/72/0000134172.JPG",
@@ -169,6 +229,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=137192",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/92/0000137192.JPG",
@@ -195,6 +256,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=133810",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/10/0000133810.JPG",
@@ -221,6 +283,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=140518",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/18/0000140518.JPG",
@@ -247,6 +310,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=136968",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/68/0000136968.JPG",
@@ -273,6 +337,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=136527",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/27/0000136527.JPG",
@@ -300,6 +365,7 @@
     ],
     "stars": 4.6,
     "unwatched": false,
+    "noRating": false,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=134927",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/27/0000134927.JPG",
@@ -326,6 +392,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=135735",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/35/0000135735.JPG",
@@ -353,6 +420,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=136038",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/38/0000136038.JPG",
@@ -379,6 +447,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=134735",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/35/0000134735.JPG",
@@ -406,7 +475,8 @@
     ],
     "stars": 3,
     "unwatched": false,
-    "onair": false,
+    "noRating": true,
+    "onair": true,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=129301",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/01/0000129301.JPG",
     "note": "**S1**　{2|2026-02-09}",
@@ -417,9 +487,16 @@
         "date": "2024-04-07",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=129301",
         "stars": 0
+      },
+      {
+        "id": "s-1779124206496-474",
+        "name": "S2",
+        "date": "2026-04-12",
+        "link": "https://acg.gamer.com.tw/acgDetail.php?s=141776",
+        "stars": 0
       }
     ],
-    "lastEdited": "2026-03-13"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2024040400",
@@ -432,6 +509,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=128241",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/41/0000128241.JPG",
@@ -458,6 +536,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=131194",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/94/0000131194.JPG",
@@ -484,6 +563,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=134939",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/39/0000134939.JPG",
@@ -511,6 +591,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=129505",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/05/0000129505.JPG",
@@ -538,7 +619,8 @@
     ],
     "stars": 3,
     "unwatched": true,
-    "onair": true,
+    "noRating": true,
+    "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=127137",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/37/0000127137.JPG",
     "note": "",
@@ -558,7 +640,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2023070200",
@@ -572,6 +654,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=126982",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/82/0000126982.JPG",
@@ -599,6 +682,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=125527",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/27/0000125527.JPG",
@@ -633,6 +717,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=128538",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/38/0000128538.JPG",
@@ -667,6 +752,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=124429",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/29/0000124429.JPG",
@@ -693,6 +779,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=120838",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/38/0000120838.JPG",
@@ -719,7 +806,8 @@
     ],
     "stars": 3,
     "unwatched": true,
-    "onair": false,
+    "noRating": true,
+    "onair": true,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=121341",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/41/0000121341.JPG",
     "note": "",
@@ -739,7 +827,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2022100800",
@@ -752,6 +840,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=115950",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/50/0000115950.JPG",
@@ -792,6 +881,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=120336",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/36/0000120336.JPG",
@@ -825,6 +915,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=119702",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/02/0000119702.PNG",
@@ -858,6 +949,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=121217",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/17/0000121217.JPG",
@@ -891,6 +983,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=120396",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/96/0000120396.JPG",
@@ -938,6 +1031,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=116799",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/99/0000116799.JPG",
@@ -964,6 +1058,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=120624",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/24/0000120624.JPG",
@@ -991,6 +1086,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=115874",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/74/0000115874.JPG",
@@ -1018,6 +1114,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=110437",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/37/0000110437.JPG",
@@ -1034,6 +1131,33 @@
     "lastEdited": "2026-03-13"
   },
   {
+    "id": "a2021040300",
+    "title": "Vivy -Fluorite Eye's Song-",
+    "originalTitle": "ヴィヴィ -フローライトアイズソング-",
+    "year": 2021,
+    "tags": [
+      "動作",
+      "科幻"
+    ],
+    "stars": 4.6,
+    "unwatched": false,
+    "noRating": false,
+    "onair": false,
+    "link": "https://acg.gamer.com.tw/acgDetail.php?s=115369",
+    "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/69/0000115369.JPG",
+    "note": "**S1**　{1|2026-05-16}\n\n其實是先被 Apple Music 推薦劇中歌曲〈Harmony of One's Heart〉後，搜尋之後才找到的動畫，還發現原來當時和 86 同季。故事設定在 2061 年，講述女主角 DIVA 為史上第一臺自律型人工智慧機器人，並作為歌唱型機器人在一間遊樂園演出。某天她遇上了~~殺老師（考哥.jpg）~~來自未來的 AI マツモト，後者聲稱為了阻止百年後 AI 與人類的戰爭發生，需要與她合作執行「奇點計畫」扭轉未來。整體節奏掌握得不錯，大致上 2-3 集為一個單元劇。本作打戲意外地紮實，畫面和音樂氛圍營造得也很好。但論劇情來說則是中規中矩，沒有什麼反轉。劇情上兩個最大的 bug 點大概是（一）既然目標是達成人和 AI 共存的世界，且已知松本修和托瓦克組織的穩健派早有接觸，那麼マツモト的目標應該要改成在這百年內扶植他們才對？畢竟雙方利害關係大方向上一致。（二）Archive 屠殺人類的動機我還是覺得有點單薄，大概是不爽人類越來越仰賴 AI 之類的，但是這和它的使命並不衝突吧？",
+    "series": [
+      {
+        "id": "s-1779111604486-554",
+        "name": "S1",
+        "date": "2021-04-03",
+        "link": "https://acg.gamer.com.tw/acgDetail.php?s=115369",
+        "stars": 4.6
+      }
+    ],
+    "lastEdited": "2026-05-18"
+  },
+  {
     "id": "a2021011000",
     "title": "無職轉生，到了異世界就拿出真本事",
     "originalTitle": "無職転生 - 異世界行ったら本気だす -",
@@ -1045,6 +1169,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=104483",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/83/0000104483.JPG",
@@ -1084,6 +1209,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=108269",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/69/0000108269.JPG",
@@ -1110,6 +1236,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=102845",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/45/0000102845.JPG",
@@ -1144,6 +1271,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=92746",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/46/0000092746.PNG",
@@ -1185,6 +1313,7 @@
     ],
     "stars": 4.6,
     "unwatched": false,
+    "noRating": false,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=98176",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/76/0000098176.PNG",
@@ -1239,6 +1368,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=94032",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/32/0000094032.JPG",
@@ -1278,33 +1408,34 @@
       "奇幻",
       "轉生"
     ],
-    "stars": 3,
+    "stars": 4.7,
     "unwatched": false,
-    "onair": false,
+    "noRating": false,
+    "onair": true,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=94601",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/01/0000094601.JPG",
-    "note": "",
+    "note": "**S1**　{2|2026-05-05}\n\n趁著第四季上映來二刷。本作描述上班族三上悟在街上因隨機攻擊而死後，轉生到異世界成為史萊姆「利姆路」，憑藉著強大~~且越來越多的~~技能逐漸建設自己的理想國的故事。第一季是我目前最喜歡的章節，因為前期戰力分配合理，而且從小村落逐漸發展為城鎮的建國譚很和我的胃口。\n\n**S2**　{2|2026-05-08}\n\n第二季重點在利姆路成為魔王的過程。契機為利姆路等人成立魔物國「朱拉·坦派斯特聯邦國」後，變為周遭部分勢力的眼中釘，在各方行動後發生了滅國級悲劇。為了復活夥伴並報仇，後半段展開了大快人心的環節：先在 33-34 集收拾法爾姆斯王國軍隊與領導層，然後經過數集籌備後在 45-48 集把克雷曼打成小丑。本作從這季開始獲得了「開會番」的稱號，認為會議篇幅過長應當縮減。我覺得藉由會議梳理各方勢力的目的挺明瞭的，畢竟謀略類的劇情很難用三言兩語交代。\n\n**S3**　{2|2026-05-11}\n\n雖然沒有閱讀過原作，不過體感上第三季是過渡性的章節？前半段講述法皇國「魯貝里歐斯」的老害們「七曜大師」與羅素家族在幕後搞事，最後被魯米納斯、迪亞布羅和~~日向狂粉~~尼可拉斯處理掉，這部分表現上沒有太突出的點。不過到了後半段開國祭的章節，感受的到製作單位將重心和經費放在這邊，節奏掌握的很好，彷彿回到第一季：熱鬧的氣氛、日新月異的技術、光明的未來。綜合來說，我認為本季還是略佳於前季。",
     "series": [
       {
         "id": "s-1772886769438-334",
         "name": "S1",
         "date": "2018-10-01",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=94601",
-        "stars": 0
+        "stars": 4.8
       },
       {
         "id": "s-1772886788976-494",
         "name": "S2",
         "date": "2021-01-12",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=104513",
-        "stars": 0
+        "stars": 4.6
       },
       {
         "id": "s-1772886791205-543",
         "name": "S3",
         "date": "2024-04-05",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=128514",
-        "stars": 0
+        "stars": 4.7
       },
       {
         "id": "s-1772887171912-369",
@@ -1342,7 +1473,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2017071200",
@@ -1354,7 +1485,8 @@
     ],
     "stars": 3,
     "unwatched": false,
-    "onair": false,
+    "noRating": true,
+    "onair": true,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=88688",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/88/0000088688.JPG",
     "note": "",
@@ -1382,13 +1514,13 @@
       },
       {
         "id": "s-1772886469739-716",
-        "name": "S4",
+        "name": "S4 (歡迎來到實力至上主義的教室 S4 2年級篇 第一學期)",
         "date": "2026-04-01",
         "link": "https://acg.gamer.com.tw/acgDetail.php?s=141201",
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2016070400",
@@ -1401,6 +1533,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=83267",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/67/0000083267.JPG",
@@ -1443,7 +1576,8 @@
     ],
     "stars": 3,
     "unwatched": false,
-    "onair": false,
+    "noRating": true,
+    "onair": true,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=78471",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/71/0000078471.JPG",
     "note": "",
@@ -1498,7 +1632,7 @@
         "stars": 0
       }
     ],
-    "lastEdited": "2026-03-07"
+    "lastEdited": "2026-05-19"
   },
   {
     "id": "a2016011300",
@@ -1513,6 +1647,7 @@
     ],
     "stars": 4.7,
     "unwatched": false,
+    "noRating": false,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=76677",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/77/0000076677.JPG",
@@ -1568,6 +1703,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=72438",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/38/0000072438.JPG",
@@ -1622,6 +1758,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=71034",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/34/0000071034.JPG",
@@ -1661,6 +1798,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=65590",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/90/0000065590.PNG",
@@ -1687,6 +1825,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=67070",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/70/0000067070.JPG",
@@ -1733,6 +1872,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=59228",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/28/0000059228.JPG",
@@ -1774,6 +1914,7 @@
     ],
     "stars": 4.2,
     "unwatched": false,
+    "noRating": false,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=52206",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/06/0000052206.JPG",
@@ -1862,6 +2003,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=28217",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/17/0000028217.JPG",
@@ -1890,6 +2032,7 @@
     ],
     "stars": 3,
     "unwatched": false,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=718",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/18/0000000718.JPG",
@@ -1965,6 +2108,7 @@
     ],
     "stars": 3,
     "unwatched": true,
+    "noRating": true,
     "onair": false,
     "link": "https://acg.gamer.com.tw/acgDetail.php?s=131066",
     "thumbnail": "https://p2.bahamut.com.tw/B/ACG/c/50/0000016250.PNG",
